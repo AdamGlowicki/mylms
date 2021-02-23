@@ -1,0 +1,341 @@
+<!--// $Id$ //-->
+<style>
+
+	#qrcode-image {
+		margin-top: 0.4em;
+	}
+
+	#show-more-less {
+		margin-left: 2em;
+		width: 3em;
+	}
+
+	ul.excludedgroups {
+		margin-block-end: 0.5em;
+	}
+
+	ul {
+		padding-inline-start: 2em;
+	}
+
+</style>
+<TABLE class="lmsbox" style="width: 100%;" cellpadding="3">
+	<colgroup>
+		<col style="width: 1%;">
+		<col style="width: 1%;">
+		<col style="width: 98%;">
+	</colgroup>
+	<THEAD>
+		<TR>
+			<TD class="bold nobr" colspan="3">
+				<IMG src="img/pass.gif" alt="">
+				{$userinfo.login} ({$userinfo.id|string_format:"%04d"})
+			</TD>
+		</TR>
+	</THEAD>
+	<TBODY>
+		<TR>
+			<TD>
+				<IMG src="img/users.gif" alt="">
+			</TD>
+			<TD class="bold nobr">
+				{trans("First name:")}
+			</TD>
+			<TD class="bold">
+				{$userinfo.firstname|escape}
+			</TD>
+		</TR>
+		<TR>
+			<TD>
+				<IMG src="img/users.gif" alt="">
+			</TD>
+			<TD class="bold nobr">
+				{trans("Last name:")}
+			</TD>
+			<TD class="bold">
+				{$userinfo.lastname|escape}
+			</TD>
+		</TR>
+{if $userinfo.position}
+		<TR>
+			<TD class="nobr">
+				<IMG src="img/info.gif" alt="">
+			</TD>
+			<TD class="bold">{trans("Position:")}</TD>
+			<TD>
+				{$userinfo.position}
+			</TD>
+		</TR>
+{/if}
+{if $userinfo.email}
+		<TR>
+			<TD class="nobr">
+				<IMG src="img/mail.gif" alt="">
+			</TD>
+			<TD class="bold">{trans("E-mail:")}</TD>
+			<TD>
+				<A href="mailto:{$userinfo.email}">{$userinfo.email}</A>
+			</TD>
+		</TR>
+{/if}
+{if $userinfo.phone}
+		<TR>
+			<TD class="nobr">
+				<IMG src="img/sms.gif" alt="">
+			</TD>
+			<TD class="bold">{trans("Phone:")}</TD>
+			<TD>
+				{$userinfo.phone}
+			</TD>
+		</TR>
+{/if}
+		<TR>
+			<TD class="nobr">
+				<IMG src="img/options.gif" alt="">
+			</TD>
+			<TD class="bold">{trans("Notification:")}</TD>
+			<TD>
+				{if !$userinfo.ntype}{trans("none")}{else}{$userinfo.ntype}{/if}
+			</TD>
+		</TR>
+		<tr>
+			<td class="nobr">
+				<img src="img/{if !$userinfo.access}no{/if}access.gif" alt="">
+			</td>
+			<td class="bold">{trans("Account active:")}</td>
+			<td>
+				{if !$userinfo.access}{trans("no")}{else}{trans("yes")}{/if}
+			</td>
+		</tr>
+{if $userinfo.accessfrom || $userinfo.accessto}
+		<tr>
+			<td class="nobr">
+				<img src="img/calendar.gif" alt="">
+			</td>
+			<td class="bold">{trans("Account active:")}</td>
+			<td>
+				{if $userinfo.accessfrom}<span class="bold">{trans("from")}:</span> {$userinfo.accessfrom}{/if}
+				{if $userinfo.accessto}<span class="bold"> {trans("to")}:</span> {$userinfo.accessto}{/if}
+			</td>
+		</tr>
+{/if}
+{if $userinfo.passwdforcechange}
+	<TR>
+		<TD class="nobr">
+			<IMG src="img/pass.gif" alt="">
+		</TD>
+		<TD class="bold nobr">
+			{trans("Force password change:")}
+		</TD>
+		<TD class="nobr">
+			{trans("yes")}
+		</TD>
+	</TR>
+{/if}
+		<TR>
+			<TD class="nobr">
+				<IMG src="img/pass.gif" alt="">
+			</TD>
+			<TD class="bold nobr">
+				{trans("Two factor authentication:")}
+			</TD>
+			<TD class="nobr">
+				{if $userinfo.twofactorauth}
+					{trans("yes")}
+					{if ConfigHelper::checkPrivilege('user_management')}
+						&nbsp;&nbsp;
+						{button icon="password" id="secretkey-show-button" label="Show secret key"}
+						{button icon="password" id="secretkey-hide-button" label="Hide secret key" visible=false}
+					{/if}
+				{else}
+					{trans("no")}
+				{/if}
+			</TD>
+		</TR>
+{if ConfigHelper::checkPrivilege('user_management') && $userinfo.twofactorauth}
+		<tr id="secretkey" style="display: none;">
+			<td colspan="2"></td>
+			<td>
+				{$userinfo.twofactorauthsecretkey}
+				<br>
+				<img id="qrcode-image" src="data:image/png;base64, {$qrcode_image}">
+			</td>
+		</tr>
+{/if}
+		<TR>
+			<TD class="nobr">
+				<IMG src="img/ip.gif" alt="">
+			</TD>
+			<TD class="nobr">
+				<span class="bold">{trans("Allowed hosts:")}</span>
+			</TD>
+			<TD class="nobr">
+				{if $userinfo.hosts}{$userinfo.hosts}{else}{trans("all")}{/if}
+			</TD>
+		</TR>
+		<TR>
+			<TD class="nobr">
+				<IMG src="img/passwd.gif" alt="">
+			</TD>
+			<TD class="bold nobr">
+				{trans("Password expiration:")}
+			</TD>
+			<TD class="nobr">
+				{$_PASSWDEXPIRATIONS[$userinfo.passwdexpiration]}
+			</TD>
+		</TR>
+		<TR>
+			<TD class="nobr">
+				<IMG src="img/passwd.gif" alt="">
+			</TD>
+			<TD class="bold nobr">
+				{trans("Last password change:")}
+			</TD>
+			<TD class="nobr">
+				{$userinfo.passwdlastchange}
+			</TD>
+		</TR>
+		<TR>
+			<TD>
+				<IMG src="img/pass.gif" alt="">
+			</TD>
+			<TD class="bold nobr">{trans("Access rights:")}</TD>
+			<TD>
+				<ul>
+				{foreach $accesslist as $access}
+				{if $access.enabled}
+				<li class="acl">{$access.name}</li>
+				{/if}
+				{/foreach}
+				</ul>
+			</TD>
+		</TR>
+
+		<tr>
+			<td class="bold nobr">
+				{icon name="usergroup" class="fa-fw"}
+			</td>
+			<td class="bold nobr">
+				{trans("User groups:")}
+			</td>
+			<td>
+				{foreach $userinfo.usergroups as $item}
+					{if $item@first}<ul>{/if}
+					<li><a href="?m=usergroupinfo&id={$item.id}">{$item.name}</a></li>
+					{if $item@last}</ul>{/if}
+				{/foreach}
+			</td>
+		</tr>
+
+		<TR>
+			<TD>
+				{icon name="customergroup" class="fa-fw"}
+			</TD>
+			<TD class="bold nobr">{trans("Excluded groups:")}</TD>
+			<TD>
+				{foreach $excludedgroups as $item}
+					{if $item@first}<ul class="excludedgroups">{/if}
+					<li class="acl excludedgroup"{if $item@iteration > 10} style="display: none;"{/if}><a href="?m=customergroupinfo&id={$item.id}">{$item.name}</a></li>
+					{if $item@last}
+						</ul>
+						{if $item@iteration > 10}
+							{button icon="more" tip="Show more/less" id="show-more-less"}
+						{/if}
+					{/if}
+				{foreachelse}
+				-
+				{/foreach}
+			</TD>
+		</TR>
+
+		<tr>
+			<td class="bold nobr">
+				{icon name="division" class="fa-fw"}
+			</td>
+			<td class="bold nobr">
+				{trans("Divisions:")}
+			</td>
+			<td>
+				{foreach $user_divisions as $item}
+					{if $item@first}<ul>{/if}
+					<li><a href="?m=divisionedit&id={$item.id}">{$item.label|escape}</a></li>
+					{if $item@last}</ul>{/if}
+				{/foreach}
+			</td>
+		</tr>
+
+		<TR>
+			<TD></TD>
+			<TD class="bold nobr">{trans("Last login:")}</TD>
+			<TD>
+				{$userinfo.lastlogin}, {$userinfo.lastloginip} {if $userinfo.lastloginip != $userinfo.lastloginhost}({$userinfo.lastloginhost}){/if}
+			</TD>
+		</TR>
+		<TR>
+			<TD></TD>
+			<TD class="bold nobr">{trans("Last failed login:")}</TD>
+			<TD>
+				{$userinfo.faillogin}, {$userinfo.failedloginip} {if $userinfo.failedloginip != $userinfo.failedloginhost}({$userinfo.failedloginhost}){/if}
+			</TD>
+		</TR>
+		{block name="other-information"}
+		{/block}
+		<TR>
+			<TD COLSPAN="3" class="lms-ui-box-buttons">
+				{if $layout.logid ne $userinfo.id}
+					{if !$userinfo.access}
+						{button label="Connect" icon="disconnected" href="?m=useraccess&id={$userinfo.id}&access=1"}
+					{else}
+						{button label="Disconnect" icon="connected" href="?m=useraccess&id={$userinfo.id}&access=0"}
+					{/if}
+				{/if}
+				{button type="link-button" label="Edit" icon="edit" href="?m=useredit&id={$userinfo.id}"}
+				{button label="Delete" icon="delete" id="delete-user" data_href="?m=userdel&id={$userinfo.id}"}
+				{if $layout.logid ne $userinfo.id}
+					{if ConfigHelper::checkPrivilege('superuser')}
+						{button label="Switch to" icon="login" href="?m=userswitch&id={$userinfo.id}"}
+					{/if}
+					{button label="Force password change" icon="password" href="?m=useredit&id={$userinfo.id}&forcepasswdchange=1"}
+				{/if}
+				{button type="link-button" label="Change password" icon="password" href="?m=userpasswd&id={$userinfo.id}"}
+				{button type="link-button" label="User list" icon="list" href="?m=userlist"}
+			</TD>
+		</TR>
+	</TBODY>
+</TABLE>
+<script>
+
+	$('#delete-user').click(function() {
+		confirmDialog($t("Are you sure, you want to irreversibly delete that user account?"), this).done(function() {
+			location.href = $(this).attr('data-href');
+		});
+		return false;
+	});
+
+	$(function() {
+		$('#secretkey-show-button').click(function() {
+			$(this).hide();
+			$('#secretkey-hide-button').show();
+			$('#secretkey').show();
+		});
+
+		$('#secretkey-hide-button').click(function() {
+			$(this).hide();
+			$('#secretkey-show-button').show();
+			$('#secretkey').hide();
+		});
+
+		$('#remove-trusted-devices').click(function() {
+			confirmDialog($t("Are you sure you want to remove all trusted devices?"), this).done(function() {
+				location.href = '?m=useredit&id={$userinfo.id}&removetrusteddevices=1';
+			});
+			return false;
+		});
+
+		$('#show-more-less').click(function() {
+			$('.excludedgroup:nth-child(n+10)').toggle();
+			$(this).find('i').toggleClass('lms-ui-icon-more lms-ui-icon-less');
+		});
+	});
+
+</script>

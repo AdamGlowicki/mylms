@@ -1,0 +1,48 @@
+{box title="Request history"}
+
+<script>
+	$(function() {
+		$(".table-click[data-href]").click(function() {
+			window.document.location = $(this).attr("data-href");
+		});
+	});
+</script>
+
+<style>
+	tr.table-click:hover {
+		cursor: pointer;
+	}
+	h5 {
+		margin-top: 10px;
+		margin-bottom: 10px;
+		font-weight: bold;
+	}
+</style>
+<h5>{trans("Request list:")}</h5>
+</style>
+
+<div class="table-responsive">
+	<table class="table table-bordered table-striped table-condensed">
+		<thead class="bg-primary lms-userpanel-table-header">
+			<th>{trans("Number:")}</th>
+			<th>{trans("Subject:")}</th>
+		</thead>
+		{section name=helpdesklist loop=$helpdesklist start=$limit}
+			<tr class="table-click" data-href="?m=helpdesk&op=view&id={$helpdesklist[helpdesklist].id}">
+				<td class="text-center align-middle"><span class="badge" style="color: white; background-color:{$_RT_STATES[$helpdesklist[helpdesklist].state].color};">{$_RT_STATES[$helpdesklist[helpdesklist].state].label}</span><br><span style="{if $helpdesklist[helpdesklist].state == RT_RESOLVED}color:grey{else}color:black{/if}">#{$helpdesklist[helpdesklist].id|string_format:"%06d"}</td>
+				<td>
+					<span {if $helpdesklist[helpdesklist].state == $smarty.const.RT_RESOLVED}style="color:grey"{/if}>{$helpdesklist[helpdesklist].subject|escape}</span>
+					<br>
+					<small class="text-muted">{trans("Date:")} {$helpdesklist[helpdesklist].createtime|date_format:"%Y/%m/%d %H:%M"} &nbsp; {trans("Last modified:")} {$helpdesklist[helpdesklist].lastmod|date_format:"%Y/%m/%d %H:%M"}</small>
+				</td>
+			</tr>
+		{sectionelse}
+			<tr>
+				<td colspan="2" class="text-nowrap">
+					{trans("No such requests in database.")}
+				</td>
+			</tr>
+		{/section}
+	</table>
+</div>
+{/box}

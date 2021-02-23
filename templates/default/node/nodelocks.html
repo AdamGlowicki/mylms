@@ -1,0 +1,64 @@
+<!--// $Id$ //-->
+{$xajax}
+
+{css}
+
+<FORM id="nodelockadd" name="nodelockadd">
+</FORM>
+
+{tab_container id="nodelocks" label="Node Locks"}
+
+	{tab_header content_id="nodelockspanel"}
+		{tab_header_cell icon="lms-ui-icon-nodelock"}
+			<strong>{trans("Locks:")}</strong>
+		{/tab_header_cell}
+	{/tab_header}
+
+	{tab_contents id="nodelockspanel"}
+
+		{tab_table id="nodelocktable"}
+			{tab_hourglass}{/tab_hourglass}
+		{/tab_table}
+
+		{tab_button_panel}
+			{tab_buttons}
+				{foreach $_DAYS as $daynr => $dayname}
+					<label>
+						{$dayname}
+						<input type="checkbox" name="days[{$daynr}]" id="lockdays_{$daynr}" value="1" form="nodelockadd">
+					</label>
+				{/foreach}
+				<select name="fhour" form="nodelockadd">
+					{for $i = 0 to 23}
+					<option value="{$i}">{$i|string_format:"%02d"}</option>
+					{/for}
+				</select>:<select name="fminute" form="nodelockadd">
+					{for $i = 0 to 59}
+					<option value="{$i}">{$i|string_format:"%02d"}</option>
+					{/for}
+				</select>
+				<select name="thour" form="nodelockadd">
+					{for $i = 0 to 23}
+					<option value="{$i}">{$i|string_format:"%02d"}</option>
+					{/for}
+				</select>:<select name="tminute" form="nodelockadd">
+					{for $i = 0 to 59}
+					<option value="{$i}">{$i|string_format:"%02d"}</option>
+					{/for}
+				</select>
+				<a class="lms-ui-button delete-button">
+					<i class="lms-ui-icon-delete" title="{trans("Clear")}"></i>
+				</a>
+			{/tab_buttons}
+			{tab_buttons}
+				{button id="nodelockaddlink" icon="add"
+					onclick="javascript:addNodeLock();" tip="Add new lock" label="Add"}
+			{/tab_buttons}
+		{/tab_button_panel}
+
+		{tab_hourglass template=1}{/tab_hourglass}
+
+	{/tab_contents}
+{/tab_container}
+
+{js}

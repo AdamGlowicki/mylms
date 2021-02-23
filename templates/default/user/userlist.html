@@ -1,0 +1,134 @@
+{extends file="layout.html"}
+{block name=title}LMS: {$layout.pagetitle|striphtml}{/block}
+{block name=module_content}
+<!--// $Id$ //-->
+<H1>{$layout.pagetitle}</H1>
+
+<script>
+
+	var userhosts = {};
+
+</script>
+
+<form method="get" action="?m={$layout.module}" name="choosefilter" id="choosefilter">
+	<p style="display: none;">
+		<INPUT type="submit" class="hiddenbtn">
+		<INPUT type="hidden" NAME="m" VALUE="userlist">
+	</p>
+<TABLE class="lmsbox lms-ui-background-cycle">
+    <COLGROUP>
+        <COL style="width: 1%;">
+        <COL style="width: 91%">
+        <COL style="width: 2%">
+        <COL style="width: 2%">
+        <COL style="width: 2%">
+        <COL style="width: 1%">
+        <COL style="width: 1%">
+    </COLGROUP>
+    <THEAD>
+	<tr>
+		<td colspan="7">
+			{division_selection name="division" selected=$selectedDivision onchange="document.choosefilter.submit();" label="Division:" superuser="{if !empty($superuser)}1{/if}"}
+		</td>
+	</tr>
+	<TR>
+		<TH scope="col">
+			<SPAN class="nobr">{trans("Login:")}</SPAN>
+		</TH>
+		<TH scope="col">
+			<SPAN class="nobr">{trans("First/last name")}</SPAN>
+		</TH>
+		<TH scope="col">
+			<SPAN class="nobr">{trans("Phone")}</SPAN>
+		</TH>
+		<TH scope="col">
+			<SPAN class="nobr">{trans("Active from:")}</SPAN>
+		</TH>
+		<TH scope="col">
+			<SPAN class="nobr">{trans("Active to:")}</SPAN>
+		</TH>
+		<TH scope="col">
+			<SPAN class="nobr">{trans("Last login:")}</SPAN>
+		</TH>
+		<TH scope="col">
+			<SPAN class="nobr">{trans("Total:")} {count($userslist)}</SPAN>
+		</TH>
+	</TR>
+    </THEAD>
+    <TBODY>
+	{foreach $userslist as $user}
+	{if $user.id}
+	<TR class="highlight{if !$user.access} blend{/if}" data-target-url="?m=userinfo&id={$user.id}" data-name="{$user.login}">
+		<TD class="nobr bold">
+			{$user.login}
+		</TD>
+		<TD class="nobr">
+			{$user.name|escape}
+		</TD>
+		<TD class="nobr">
+			{if $user.phone}{$user.phone}{else} - {/if}
+		</TD>
+		<td class="nobr">
+			{$user.accessfrom}
+		</td>
+		<td class="nobr">
+			{$user.accessto}
+		</td>
+		<TD class="nobr">
+			{$user.lastlogin}
+{*
+			{$user.lastloginip} {if $user.lastloginip != $user.lastloginhost}({$user.lastloginhost}){/if}
+*}
+			{$user.lastloginip}
+			{if $user.lastloginip != '-'}
+				(<span id="hostname-{$user.id}"><i class="lms-ui-hourglass"></i></span>)
+				<script>
+					userhosts["#hostname-{$user.id}"] = "{$user.lastloginip}";
+				</script>
+			{/if}
+		</TD>
+		<TD class="lms-ui-buttons text-right nobr">
+			{if $layout.logid ne $user.id}
+			    {if !$user.access}
+					{button type="link" icon="disconnected" tip="Connect" href="?m=useraccess&id={$user.id}&access=1"}
+				{else}
+					{button type="link" icon="connected" tip="Disconnect" href="?m=useraccess&id={$user.id}&access=0"}
+			    {/if}
+				{button type="link" icon="consent" tip="Force password change" href="?m=useredit&id={$user.id}&forcepasswdchange=1"}
+				{if ConfigHelper::checkPrivilege('superuser')}
+					{button type="link" icon="login" tip="Switch to" href="?m=userswitch&id={$user.id}"}
+				{/if}
+			{/if}
+			{button type="link" icon="password" tip="Change password" href="?m=userpasswd&id={$user.id}"}
+			{if $user.id != $layout.logid}
+				{button type="link" class="delete-user" icon="delete" tip="Delete" href="?m=userdel&id={$user.id}"}
+			{/if}
+			{button type="link" icon="edit" tip="Edit" href="?m=useredit&id={$user.id}"}
+			{button type="link" icon="info" tip="Info" href="?m=userinfo&id={$user.id}"}
+		</TD>
+	</TR>
+	{/if}
+	{/foreach}
+    </TBODY>
+</TABLE>
+</form>
+	<script>
+
+		$('.delete-user').click(function() {
+			var name = $(this).closest('tr').attr('data-name');
+			confirmDialog($t("Are you sure, you want to irreversibly delete that user account '$a'?", name), this).done(function() {
+				location.href = $(this).attr('href');
+			});
+			return false;
+		});
+
+		get_revdns(userhosts);
+
+		$(function() {
+			$('.division-context').on( 'lms:division_selection', function() {
+				document.choosefilter.submit();
+			});
+		});
+
+	</script>
+{/block}

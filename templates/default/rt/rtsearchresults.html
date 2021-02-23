@@ -1,0 +1,137 @@
+{extends file="layout.html"}
+{block name=title}LMS: {$layout.pagetitle|striphtml}{/block}
+{block name=module_content}
+<!-- $Id$ -->
+<H1>{$layout.pagetitle}</H1>
+
+<style>
+
+	@media screen and (max-width: 1200px) {
+		.ticket-location,
+		.ticket-deadline,
+		.ticket-events {
+			display: none;
+		}
+	}
+
+</style>
+
+<TABLE class="lmsbox lms-ui-background-cycle lms-ui-multi-check">
+	<COLGROUP>
+		<COL style="width: 1%;">
+		<COL style="width: 1%;">
+		<COL style="width: 1%;">
+		<COL style="width: 1%;">
+		<COL style="width: 50%;">
+		<COL style="width: 45%;">
+		<COL style="width: 1%;">
+		<COL style="width: 1%;">
+		<COL style="width: 1%;">
+		<COL style="width: 1%;">
+	</COLGROUP>
+    <THEAD>
+	{include file="rt/rtheader.html"}
+	<TR>
+		<TD class="lms-ui-pagination" colspan="6">
+			{if $pagination->getTotal() != 0}
+			{include file="pagination.html"}
+			{/if}
+		</TD>
+		<TD class="text-right" colspan="4">
+			<label> <input type="checkbox" class="lms-ui-multi-check-all">
+				{trans("Check all")}
+			</label>
+			{button icon="fas fa-reply-all" class="group-action-run" label="Run group action"}
+			{button icon="add" onclick="location.href = '?m=rtticketadd{if $queuedata.queue && !is_array($queuedata.queue)}&id={$queuedata.queue}{/if}&customerid={$filter.custid}';"
+				label="New Ticket"}
+		</TD>
+	</TR>
+    </THEAD>
+    <TBODY>
+	{include file="rt/rtqueueviewbox.html"}
+    </TBODY>
+	<TFOOT>
+	<TR>
+		<TD class="lms-ui-pagination" colspan="6">
+			{if $pagination->getTotal() != 0}
+			{include file="pagination.html"}
+			{/if}
+		</TD>
+		<TD class="text-right dark" colspan="4">
+			<label>
+				<input type="checkbox" class="lms-ui-multi-check-all">
+				{trans("Check all")}
+			</label>
+			{button icon="fas fa-reply-all" class="group-action-run" label="Run group action"}
+			{button icon="add" onclick="location.href = '?m=rtticketadd{if $queuedata.queue && !is_array($queuedata.queue)}&id={$queuedata.queue}{/if}&customerid={$filter.custid}';"
+				label="New Ticket"}
+		</TD>
+	</TR>
+	</TFOOT>
+</TABLE>
+<script>
+
+	function get_backid(elem) {
+		var ticket = $(elem).closest('.single-ticket').prev('.single-ticket');
+		if (ticket.length) {
+			return '&backid=' + ticket.attr('id');
+		}
+		return '';
+	}
+
+	$(function() {
+		function disableLink() {
+			var disabled = $('.lms-ui-multi-check:checked').length < 2;
+			if (disabled) {
+				$('.group-action-run').prop('disabled', true);
+			} else {
+				$('.group-action-run').prop('disabled', false);
+			}
+		}
+		disableLink();
+
+		$('.lms-ui-multi-check:checkbox,.lms-ui-multi-check-all:checkbox').click(function () {
+			disableLink();
+		});
+
+		$('.group-action-run').click(function () {
+			var ticketid = [];
+			$('[name="ticketid[]"]:checked').each(function () {
+				ticketid.push($(this).val());
+			});
+			location.href = '?m=rtmessageadd&ticketid[]=' + ticketid.join('&ticketid[]=');
+		});
+
+		$('.ticket-image-gallery').click(function() {
+			var btn = this;
+			$.ajax({
+				url: "?m=rtticketview&api=1&ajax=1&op=get-image-gallery&id=" +
+						parseInt($(this).closest('tr').attr('data-ticket-id')),
+				method: "GET",
+				dataType: "json",
+				success: function(data) {
+					if (data.length) {
+						showGallery(data);
+					} else {
+						$(btn).hide();
+					}
+				}
+			});
+			return false;
+		});
+
+		$(window).resize(function() {
+			if (parseInt($(this).outerWidth()) <= 1200) {
+				$('.ticket-list-filter').attr('colspan', 7);
+				$('.ticket-list-pagination').attr('colspan', 4);
+				$('.ticket-list-buttons').attr('colspan', 3);
+			} else {
+				$('.ticket-list-filter').attr('colspan', 10);
+				$('.ticket-list-pagination').attr('colspan', 6);
+				$('.ticket-list-buttons').attr('colspan', 4);
+			}
+		}).resize();
+	});
+
+</script>
+{/block}

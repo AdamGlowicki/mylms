@@ -1,0 +1,170 @@
+<style>
+
+	.customer-contact {
+		display: flex;
+	}
+
+</style>
+
+<TABLE class="lmsbox-inner" id="table">
+	<colgroup>
+		<col style="width: 1%;">
+		<col style="width: 99%;">
+	</colgroup>
+    <THEAD>
+	<TR>
+		<TD>
+			{icon name="customer" class="fa-fw"}
+		</TD>
+		<TD>
+			<strong>{$customerinfo.customername|escape} ({$customerinfo.id|string_format:"%04d"}){if $customerinfo.deleted} <span class="alert">({trans("deleted customer")})</span>{/if}</strong>
+		</TD>
+	</TR>
+    </THEAD>
+    <TBODY>
+	<TR>
+		<TD>
+			{icon name="customer-status-{$_CSTATUSES[$customerinfo.status].alias}" class="fa-fw"}
+		</TD>
+		<TD class="bold">
+			{$_CSTATUSES[$customerinfo.status].singularlabel}
+		</TD>
+	</TR>
+	<TR>
+		<TD>
+			{icon name="homr" class="fa-fw"}
+		</TD>
+		<TD class="nobr">
+			{if $customerinfo.postoffice && $customerinfo.postoffice != $customerinfo.city && $customerinfo.street}{$customerinfo.city}, {/if}{$customerinfo.address}<BR>
+			{$customerinfo.zip} {if $customerinfo.postoffice}{$customerinfo.postoffice}{else}{$customerinfo.city}{/if}
+		</TD>
+	</TR>
+{if $customerinfo.post_name != "" || $customerinfo.post_address != ""}
+	<TR>
+		<TD>
+			{icon name="mail" class="fa-fw"}
+		</TD>
+		<TD class="nobr">
+			{if $customerinfo.post_name != ""}{$customerinfo.post_name|escape}{/if}
+			{if $customerinfo.post_address != ""}{if $customerinfo.post_name != ""}<BR>{/if}
+				{if $customerinfo.post_postoffice && $customerinfo.post_postoffice != $customerinfo.post_city && $customerinfo.post_street}{$customerinfo.post_city}, {/if}
+				{$customerinfo.post_address}
+			{/if}
+			<br>
+			{$customerinfo.post_zip} {if $customerinfo.post_postoffice}{$customerinfo.post_postoffice}{else}{$customerinfo.post_city}{/if}
+		</TD>
+	</TR>
+{/if}
+
+{foreach $_CUSTOMERCONTACTTYPES as $type => $properties}
+	{if isset($customerinfo[$type|cat:"s"])}
+		<TR>
+			<TD></TD>
+			<TD class="customer-contact">
+				<fieldset style="width: auto;">
+					<legend class="bold nobr">
+						{icon name="{$properties.ui.legend.icon}" class="fa-fw"}
+						{$properties.ui.legend.text}
+					</legend>
+					<TABLE>
+						{foreach $customerinfo[$type|cat:"s"] as $contact}
+							<TR{if ($contact.type & $smarty.const.CONTACT_DISABLED) == $smarty.const.CONTACT_DISABLED} class="blend"{/if}>
+								<TD class="customer-contact">
+									<div>
+										{if isset($properties.formatter)}{call_user_func($properties['formatter'], $contact)}{else}{$contact.contact|escape}{/if}
+										{if $contact.typestr}[{$contact.typestr}]{/if}
+										{if $contact.name} ({$contact.name|trunescape:40}){/if}
+									</div>
+								</TD>
+							</TR>
+						{/foreach}
+					</TABLE>
+				</fieldset>
+			</TD>
+		</TR>
+	{/if}
+{/foreach}
+
+{if $customerinfo.icn != ""}
+	<TR>
+		<TD>
+			{icon name="user-id-number" class="fa-fw"}
+		</TD>
+		<TD class="nobr">
+			{trans("Identity type:")}: {trans($_IDENTITY_TYPES[$customerinfo.ict])}
+		</TD>
+	</TR>
+	<TR>
+		<TD>
+			{icon name="user-id-number" class="fa-fw"}
+		</TD>
+		<TD class="nobr">
+			{trans("Identity number:")}: {$customerinfo.icn|escape}
+		</TD>
+	</TR>
+{/if}
+{if $customerinfo.ssn != ""}
+	<TR">
+		<TD>
+			{icon name="user-id-number" class="fa-fw"}
+		</TD>
+		<TD class="nobr">
+			{trans("SSN")}: {$customerinfo.ssn|escape}
+		</TD>
+	</TR>
+{/if}
+{if $customerinfo.ten != ""}
+	<TR>
+		<TD>
+			{icon name="user-id-number" class="fa-fw"}
+		</TD>
+		<TD class="nobr">
+			{trans("TEN")}: {$customerinfo.ten}
+		</TD>
+	</TR>
+{/if}
+{if $customerinfo.regon != ""}
+	<TR>
+		<TD>
+			{icon name="user-id-number" class="fa-fw"}
+		</TD>
+		<TD class="nobr">
+			{trans("REGON")}: {$customerinfo.regon}
+		</TD>
+	</TR>
+{/if}
+{if $customerinfo.rbe != ""}
+	<TR>
+		<TD>
+			{icon name="user-id-number" class="fa-fw"}
+		</TD>
+		<TD class="nobr">
+			{trans("RBE")}: {$customerinfo.rbe|escape}
+		</TD>
+	</TR>
+{/if}
+{if $customergroups}
+	<TR>
+		<TD>
+			{icon name="customergroup" class="fa-fw"}
+		</TD>
+		<TD>
+			{foreach from=$customergroups item=customergroup name=customergroup}
+				{$customergroup.name}{if !$smarty.foreach.customergroup.last},{/if}
+			{/foreach}
+		</TD>
+	</TR>
+{/if}
+{if ConfigHelper::checkConfig('privileges.superuser') || !ConfigHelper::checkConfig('privileges.hide_finances')}
+	<TR>
+		<TD>
+			{icon name="money" class="fa-fw"}
+		</TD>
+		<TD class="nobr">
+			<strong>{trans("Balance:")}</strong>
+			{if $customerinfo.balance < 0}<span class="lms-ui-alert">{$customerinfo.balance|money_format}</span>{else}{$customerinfo.balance|default:"0"|money_format}{/if}
+		</TD>
+	</TR>
+{/if}
+    </TBODY>
+</TABLE>

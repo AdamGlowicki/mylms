@@ -1,0 +1,304 @@
+{extends file="layout.html"}
+{block name=title}LMS: {$layout.pagetitle|striphtml}{/block}
+{block name=module_content}
+<!--// $Id$ //-->
+<H1>{$layout.pagetitle}</H1>
+
+<script>
+
+	{if $note}
+	window.open('?m=note&id={$note}');
+	{/if}
+
+	function prints()
+	{
+		document.page.action="?m=note&print=cached";
+		document.page.target="_blank";
+		document.page.submit();
+	}
+
+	function filter()
+	{
+		document.page.action="?m=notelist";
+		document.page.target="";
+		document.page.submit();
+	}
+
+</script>
+
+<FORM METHOD="POST" NAME="page">
+<INPUT type="submit" class="hiddenbtn">
+<TABLE class="lmsbox lms-ui-background-cycle">
+	<COLGROUP>
+		<COL style="width: 1%;">
+		<COL style="width: 1%;">
+		<COL style="width: 1%;">
+		<COL style="width: 1%;">
+		<COL style="width: 1%;">
+		<COL style="width: 94%;">
+		<COL style="width: 1%;">
+	</COLGROUP>
+    <THEAD>
+	<TR>
+		<TD class="nobr">
+			<A href="?m=notelist&amp;o=id{if $listdata.direction == "asc" && $listdata.order == "id"},desc{/if}">{trans("ID:")}</A> {if $listdata.order == "id"}<IMG src="img/{if $listdata.direction == "desc"}asc{else}desc{/if}_order.gif" alt="">{/if}
+		</TD>
+		<TD class="nobr">
+			<A href="?m=notelist&amp;o=cdate{if $listdata.direction == "asc" && $listdata.order == "cdate"},desc{/if}">{trans("Date:")}</A> {if $listdata.order == "cdate"}<IMG src="img/{if $listdata.direction == "desc"}asc{else}desc{/if}_order.gif" alt="">{/if}
+		</TD>
+		<TD class="nobr">
+			<A href="?m=notelist&amp;o=number{if $listdata.direction == "asc" && $listdata.order == "number"},desc{/if}">{trans("Number:")}</A> {if $listdata.order == "number"}<IMG src="img/{if $listdata.direction == "desc"}asc{else}desc{/if}_order.gif" alt="">{/if}
+		</TD>
+		<TD class="nobr">
+			<A href="?m=notelist&amp;o=value{if $listdata.direction == "asc" && $listdata.order == "value"},desc{/if}">{trans("Value:")}</A> {if $listdata.order == "value"}<IMG src="img/{if $listdata.direction == "desc"}asc{else}desc{/if}_order.gif" alt="">{/if}
+		</TD>
+		<TD class="nobr">
+			<A href="?m=notelist&amp;o=count{if $listdata.direction == "asc" && $listdata.order == "count"},desc{/if}">{trans("Items:")}</A> {if $listdata.order == "count"}<IMG src="img/{if $listdata.direction == "desc"}asc{else}desc{/if}_order.gif" alt="">{/if}
+		</TD>
+		<TD class="nobr">
+			<A href="?m=notelist&amp;o=name{if $listdata.direction == "asc" && $listdata.order == "name"},desc{/if}">{trans("For:")}</A> {if $listdata.order == "name"}<IMG src="img/{if $listdata.direction == "desc"}asc{else}desc{/if}_order.gif" alt="">{/if}
+		</TD>
+		<TD>
+			&nbsp;
+		</TD>
+	</TR>
+	<TR>
+		<TD colspan="7">
+				<span class="bold">{trans("Filter:")}</span>
+				<INPUT type="text" name="search" value="{$listdata.search}" size="15" {tip text="Enter value of searching data and select category"}>&nbsp;
+				<SELECT size="1" name="cat">
+					<OPTION value=""{if $listdata.cat == ""} SELECTED{/if}>{trans("- select filter category -")}</OPTION>
+					<OPTION value="cdate"{if $listdata.cat == "cdate"} SELECTED{/if}>{trans("day (YYYY/MM/DD)")}</OPTION>
+					<OPTION value="month"{if $listdata.cat == "month"} SELECTED{/if}>{trans("month (YYYY/MM)")}</OPTION>
+					<OPTION value="number"{if $listdata.cat == "number"} SELECTED{/if}>{trans("number")}</OPTION>
+					<OPTION value="value"{if $listdata.cat == "value"} SELECTED{/if}>{trans("value")}</OPTION>
+					<OPTION value="name"{if $listdata.cat == "name"} SELECTED{/if}>{trans("customer name")}</OPTION>
+					<OPTION value="customerid"{if $listdata.cat == "customerid"} SELECTED{/if}>{trans("customer ID")}</OPTION>
+					<OPTION value="ten"{if $listdata.cat == "ten"} SELECTED{/if}>{trans("TEN")}</OPTION>
+					<OPTION value="address"{if $listdata.cat == "address"} SELECTED{/if}>{trans("address")}</OPTION>
+				</SELECT>&nbsp;
+				{trans("Group:")}
+				<SELECT size="1" name="group">
+					<OPTION value="0"{if !$listdata.group} SELECTED{/if}>{trans("- all groups -")}</OPTION>
+					{section name="grouplist" loop=$grouplist}
+					<OPTION value="{$grouplist[grouplist].id}"{if $listdata.group == $grouplist[grouplist].id} SELECTED{/if}>{$grouplist[grouplist].name|truncate:30:"&hellip;":true}</OPTION>
+					{/section}
+				</SELECT>
+				<INPUT type="checkbox" name="groupexclude" id="groupexclude"{if $listdata.groupexclude} CHECKED{/if}><label for="groupexclude">{trans("exclude group")}</label>
+				<INPUT type="checkbox" name="hideclosed" id="hideclosed"{if $listdata.hideclosed} CHECKED{/if}><label for="hideclosed">{trans("hide accounted<!plural>")}</label>
+				&nbsp;<A href="javascript:filter();">&raquo;&raquo;&raquo;</A>
+		</TD>
+	</TR>
+	{if $pagination->getTotal() != 0}
+	<TR>
+		<TD class="lms-ui-pagination" COLSPAN="7">
+			{include file="pagination.html"}
+		</TD>
+	</TR>
+	{/if}
+    </THEAD>
+    <TBODY class="lms-ui-multi-check">
+	{foreach $notelist as $note}
+	{assign var=noteid value=$note.id}
+	{number number=$note.number template=$note.template time=$note.cdate assign=number customerid=$note.customerid}
+	<TR class="highlight{if $note.closed} blend{elseif $note.cancelled} cancel{/if}" data-published="{$note.published}" data-number="{$number}">
+		<TD>
+			{$note.id|string_format:"%06d"}
+		</TD>
+		<TD class="nobr">
+			{$note.cdate|date_format:"%Y/%m/%d %H:%M"}
+		</TD>
+		<TD class="text-right nobr">
+			{$number}
+		</TD>
+		<TD class="text-right nobr">
+			{moneyf($note.value, $note.currency)}
+		</TD>
+		<TD class="text-right nobr">
+			{$note.count}
+		</TD>
+		<TD>
+			<A HREF="?m=customerinfo&id={$note.customerid}"{if $note.closed} class="blend"{/if}>{$note.name}, {$note.address}, {$note.zip} {$note.city}{if $note.country != ""}, {t}{$note.country}{/t}{/if}</A>
+		</TD>
+		<TD class="text-right nobr">
+			{if !$note.closed}
+				{if !$note.archived && (!$note.published || ConfigHelper::checkPrivilege('published_document_modification'))}
+					{button type="link" icon="delete" tip="Delete" class="delete-note" href="?m=notedel&id={$note.id}"}
+					{button type="link" icon="edit" tip="Edit" class="edit-note" href="?m=noteedit&id={$note.id}&action=edit"}
+				{/if}
+			{/if}
+
+			{if !$note.cancelled}
+				{if !$note.archived && (!$note.published || ConfigHelper::checkPrivilege('published_document_modification'))}
+					{button type="link" icon="cancel" tip="Cancel" class="cancel-note" href="?m=notecancel&id={$note.id}"}
+				{/if}
+			{else}
+				{button type="link" icon="back" tip="Recover" class="recover-note" href="?m=notecancel&id={$note.id}&recover=1"}
+			{/if}
+
+			{if !$note.cancelled}
+				{if !$note.archived}
+					{if ConfigHelper::checkPrivilege('trade_document_archiving')}
+						{button type="link" icon="archive" tip="Archive" href="?m=notearchive&id={$note.id}"}
+					{/if}
+				{else}
+					{if ConfigHelper::checkPrivilege('trade_document_unarchiving')}
+						{button type="link" icon="restore" tip="Unarchive" href="?m=noteunarchive&id={$note.id}"}
+					{/if}
+				{/if}
+			{/if}
+
+			{if !$note.published || ConfigHelper::checkPrivilege('published_document_modification')}
+				{button type="link" icon="view" tip="Preview" external=true href="?m=note&id={$note.id}&dontpublish=1"}
+			{/if}
+			{button type="link" icon="print" tip="Print" external=true href="?m=note&id={$note.id}"}
+			<INPUT TYPE="checkbox" NAME="marks[{$note.id}]" VALUE="{$note.id}"{if $marks.$noteid}CHECKED{/if} class="lms-ui-multi-check">
+		</TD>
+	</TR>
+	{foreachelse}
+	<TR>
+		<TD COLSPAN="7" class="empty-table">
+			<p>{trans("No such debit notes in database.")}</p>
+		</TD>
+	</TR>
+	{/foreach}
+    </TBODY>
+    <TFOOT>
+	{if $pagination->getTotal() != 0}
+	<TR>
+		<TD class="lms-ui-pagination" COLSPAN="7">
+			{include file="pagination.html"}
+		</TD>
+	</TR>
+	{/if}
+	<TR>
+		<TD COLSPAN="7">
+			<TABLE WIDTH="100%">
+				<TR>
+					<TD class="text-left">
+						{button icon="cash" label="Check/Uncheck as accounted" id="account-notes"}
+						{if ConfigHelper::checkPrivilege('trade_document_archiving')}
+							{button icon="archive" id="archive-notes" label="Archive"}
+						{/if}
+						{if ConfigHelper::checkPrivilege('trade_document_unarchiving')}
+							{button icon="restore" id="unarchive-notes" label="Unarchive"}
+						{/if}
+						{button icon="print" label="Print" id="print-notes"}
+					</TD>
+					<TD class="text-right nobr">
+						<label>
+							{trans("Check All")}
+							<INPUT TYPE="checkbox" NAME="allbox" VALUE="1" class="lms-ui-multi-check-all">
+						</label>
+					</TD>
+				</TR>
+			</TABLE>
+		</TD>
+	</TR>
+    </TFOOT>
+</TABLE>
+</FORM>
+
+<script>
+
+	$('.delete-note').click(function() {
+		var published = parseInt($(this).closest('tr').attr('data-published'));
+		var number = $(this).closest('tr').attr('data-number');
+		if (published) {
+			confirmDialog($t('Document has been published already! Are you sure you want to remove it despite this?'), this).done(function() {
+				confirmDialog($t("Are you sure, you want to remove debit note '$a' from database?", number), this).done(function () {
+					location.href = $(this).attr('href');
+				});
+			});
+		} else {
+			confirmDialog($t("Are you sure, you want to remove debit note '$a' from database?", number), this).done(function () {
+				location.href = $(this).attr('href');
+			});
+		}
+		return false;
+	});
+
+	$('.edit-note').click(function() {
+		var published = parseInt($(this).closest('tr').attr('data-published'));
+		if (published) {
+			confirmDialog($t('Document has been published already! Are you sure you want to edit it despite this?'), this).done(function() {
+				location.href = $(this).attr('href');
+			});
+			return false;
+		}
+	});
+
+	$('.cancel-note').click(function() {
+		var published = parseInt($(this).closest('tr').attr('data-published'));
+		var number = $(this).closest('tr').attr('data-number');
+		if (published) {
+			confirmDialog($t('Document has been published already! Are you sure you want to remove it despite this?'), this).done(function() {
+				confirmDialog($t("Are you sure, you want to cancel debit note '$a'?", number), this).done(function () {
+					location.href = $(this).attr('href');
+				});
+			});
+		} else {
+			confirmDialog($t("Are you sure, you want to cancel debit note '$a'?", number), this).done(function () {
+				location.href = $(this).attr('href');
+			});
+		}
+		return false;
+	});
+
+	$('.recover-note').click(function() {
+		var number = $(this).closest('tr').attr('data-number');
+		confirmDialog($t("Are you sure, you want to recover cancelled debit note '$a'?", number), this).done(function() {
+			location.href = $(this).attr('href');
+		});
+		return false;
+	});
+
+	$('#account-notes').click(function() {
+		if (!$(this).closest('tfoot').prev('.lms-ui-multi-check').find('input.lms-ui-multi-check:checked').length) {
+			return;
+		}
+
+		confirmDialog($t("Are you sure, you want to check/uncheck selected debit notes as accounted?"), this).done(function() {
+			document.page.action="?m=notepaid";
+			document.page.target="";
+			document.page.submit();
+		});
+	});
+
+	$('#archive-notes').click(function() {
+		if (!$(this).closest('tfoot').prev('.lms-ui-multi-check').find('input.lms-ui-multi-check:checked').length) {
+			return;
+		}
+
+		confirmDialog($t("Are you sure, you want to archive selected debit notes?"), this).done(function() {
+			document.page.action="?m=notearchive&marks=invoice";
+			document.page.target="";
+			document.page.submit();
+		});
+	});
+
+	$('#unarchive-notes').click(function() {
+		if (!$(this).closest('tfoot').prev('.lms-ui-multi-check').find('input.lms-ui-multi-check:checked').length) {
+			return;
+		}
+
+		confirmDialog($t("Are you sure, you want to unarchive selected debit notes"), this).done(function() {
+			document.page.action="?m=noteunarchive&marks=invoice";
+			document.page.target="";
+			document.page.submit();
+		});
+	});
+
+	$('#print-notes').click(function() {
+		if (!$(this).closest('tfoot').prev('.lms-ui-multi-check').find('input.lms-ui-multi-check:checked').length) {
+			return;
+		}
+
+		document.page.action="?m=note&print=cached";
+		document.page.target="_blank";
+		document.page.submit();
+	});
+
+</script>
+
+{/block}

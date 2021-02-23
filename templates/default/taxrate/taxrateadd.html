@@ -1,0 +1,103 @@
+{extends file="layout.html"}
+{block name=title}LMS: {$layout.pagetitle|striphtml}{/block}
+{block name=module_content}
+<!--// $Id$ //-->
+<H1>{$layout.pagetitle}</H1>
+<FORM method="POST" action="?m=taxrateadd" name="taxrateadd">
+<INPUT type="submit" class="hiddenbtn">
+<TABLE class="lmsbox">
+	<COLGROUP>
+		<COL style="width: 1%;">
+		<COL style="width: 1%;">
+		<COL style="width: 98%;">
+	</COLGROUP>
+    <THEAD>
+	<TR>
+		<TD>
+			<IMG src="img/tax.gif" alt="">
+		</TD>
+		<TD class="bold">
+			{trans("Label:")}
+		</TD>
+		<TD>
+			<INPUT type="text" name="taxrateadd[label]" value="{$taxrateadd.label}" size="16" {tip text="Enter tax rate label" trigger="label"}>
+		</TD>
+	</TR>
+    </THEAD>
+    <TBODY>
+	<TR>
+		<TD>
+			<IMG src="img/pay.gif" alt="">
+		</TD>
+		<TD class="bold nobr">
+			{trans("Value:")}
+		</TD>
+		<TD>
+			<INPUT type="text" name="taxrateadd[value]" value="{$taxrateadd.value|string_format:"%.2f"}" size="10" {tip text="Enter percentage value of tax rate" trigger="value"}>
+		</TD>
+	</TR>
+	<TR>
+		<TD>
+			<IMG src="img/pay.gif" alt="">
+		</TD>
+		<TD class="bold">
+			<label for="taxing">
+				{trans("Taxing:")}
+			</label>
+		</TD>
+		<TD>
+			<INPUT type="checkbox" id="taxing" name="taxrateadd[taxed]" value="1" {tip text="Select taxing status"}{if $taxrateadd.taxed!="0"}CHECKED{/if}>
+		</TD>
+	</TR>
+	<TR>
+		<TD>
+			<IMG src="img/pay.gif" alt="">
+		</TD>
+		<TD class="bold nobr">
+			<label for="reversecharge">
+				{trans("Reverse charge:")}
+			</label>
+		</TD>
+		<TD>
+			<INPUT type="checkbox" id="reversecharge" name="taxrateadd[reversecharge]" value="1" {tip text="Check if reverse charge should be applied"}{if $taxrateadd.reversecharge} checked{/if}>
+		</TD>
+	</TR>
+	<TR>
+		<TD>
+			<IMG src="img/calendar.gif" alt="">
+		</TD>
+		<TD class="bold nobr">
+			{trans("Binds from date:")}
+		</TD>
+		<TD>
+			<INPUT type="text" name="taxrateadd[validfrom]" value="{$taxrateadd.validfrom}" size="10" placeholder="{trans("yyyy/mm/dd")}" {tip class="lms-ui-date" text="Enter date in YYYY/MM/DD format (empty field means no limit) or click to choose it from calendar" trigger="validfrom"}>
+		</TD>
+	</TR>
+	<TR>
+		<TD>
+			<IMG src="img/calendar.gif" alt="">
+		</TD>
+		<TD class="bold nobr">
+			{trans("Binds to date:")}
+		</TD>
+		<TD>
+			<INPUT type="text" name="taxrateadd[validto]" value="{$taxrateadd.validto}" size="10" placeholder="{trans("yyyy/mm/dd")}" {tip class="lms-ui-date" text="Enter date in YYYY/MM/DD format (empty field means no limit) or click to choose it from calendar" trigger="validto"}>
+		</TD>
+	</TR>
+	<TR>
+		<TD class="buttons" colspan="3">
+			<A href="javascript:document.taxrateadd.submit();" accesskey="s">{trans("Submit")} <IMG src="img/save.gif" alt=""></A>
+			<A href="?m=taxratelist">{trans("Cancel")} <IMG src="img/cancel.gif" alt=""></A><BR>
+			<INPUT type="checkbox" name="taxrateadd[reuse]" value="ON" {if $taxrateadd.reuse}checked{/if}> {trans("Display this form again, when this tax rate is saved")}
+		</TD>
+	</TR>
+    </TBODY>
+</TABLE>
+<SCRIPT type="text/javascript">
+<!--
+	$(function() {
+		$('form[name="taxrateadd"] [name="taxrateadd[label]"]').focus();
+	});
+//-->
+</SCRIPT>
+{/block}

@@ -1,0 +1,82 @@
+<!--// $Id$ //-->
+<TABLE class="lmsbox lms-ui-tab-container lms-ui-sortable" id="customeractions" data-label="{trans("Actions")}">
+	<COLGROUP>
+		<COL style="width: 99%;">
+		<COL style="width: 1%;">
+	</COLGROUP>
+    <THEAD>
+	<TR class="hand lmsbox-titlebar" data-lmsbox-content="customeractionpanel">
+		<TD class="bold">
+			<i class="lms-ui-icon-configuration lms-ui-sortable-handle"></i>
+			{trans("Actions:")}
+		</TD>
+		<TD class="text-right nobr">
+		</TD>
+	</TR>
+    </THEAD>
+    <TBODY>
+	<TR id="customeractionpanel" style="display:none;">
+		<TD class="container" colspan="2">
+		    <FORM method="GET" name="cutoffstopaction" action="?m=customercutoffstop">
+			<INPUT type="hidden" name="m" value="customercutoffstop">
+			<INPUT type="hidden" name="customerid" value="{$customerinfo.id}">
+			<TABLE class="lmsbox-inner">
+				<tbody>
+				<TR>
+					<TD width="1%">
+					    <i class="lms-ui-icon-money"></i>
+					</TD>
+					<TD style="width: 98%;">
+						{trans("Cutoff suspending:")}
+						<label>
+							<input type="checkbox" name="cutoffstopindefinitely" value="1" onchange="$('#cutoffstop').css('display', this.checked ? 'none' : '');"{if $customerinfo.cutoffstop == intval(pow(2, 31) - 1)} checked{/if}>
+							{trans("indefinitely")}
+						</label>&nbsp;
+						<INPUT type="text" name="cutoffstop" id="cutoffstop" {if $customerinfo.cutoffstop == intval(pow(2, 31) - 1)}style="display: none;"{elseif $customerinfo.cutoffstop}value="{$customerinfo.cutoffstop|date_format:"%Y/%m/%d"}"{/if} size="10" {tip class="lms-ui-date" text="Select date of cutoff suspending (optional)" trigger="cutoffstop"}>
+					</TD>
+					<TD width="1%" class="nobr text-right">
+						<A href="javascript:document.cutoffstopaction.submit()">{trans("Submit")} <i class="lms-ui-icon-save"></i></a>
+					</TD>
+				</TR>
+				</tbody>
+			</table>
+		    </FORM>
+		    <FORM method="POST" name="warningaction" action="?m=customerwarn">
+		    <INPUT type="hidden" name="setwarnings[mcustomerid][{$customerinfo.id}]" value="{$customerinfo.id}">
+			<TABLE class="lmsbox-inner">
+                            <TBODY>
+				<TR>
+					<TD width="1%">
+					    <i class="lms-ui-icon-warning"></i>
+					</TD>
+					<TD width="98%" class="nobr">
+					    {trans("Notice content:")}
+					    <TEXTAREA name="setwarnings[message]" cols="60" rows="5" {tip text="Enter notice contents"}>{$customerinfo.message|escape}</TEXTAREA>
+					    <INPUT TYPE="checkbox" NAME="setwarnings[warnon]" ID="warnon" onchange="switchbox('warnon');"><label for="warnon">{trans("Enable")}</label>
+					    <INPUT TYPE="checkbox" NAME="setwarnings[warnoff]" ID="warnoff" onchange="switchbox('warnoff');"><label for="warnoff">{trans("Disable")}</label>
+					</TD>
+					<TD width="1%" class="nobr text-right">
+						<A href="javascript:document.warningaction.submit()">{trans("Submit")} <i class="lms-ui-icon-save"></i></a>
+					</TD>
+				</TR>
+                            </TBODY>
+			</TABLE>
+		    </FORM>
+		</TD>
+	</TR>
+    </TBODY>
+</TABLE>
+<SCRIPT type="text/javascript">
+<!--
+if (getCookie('customeractionpanel') == '1')
+	document.getElementById('customeractionpanel').style.display = '';
+
+function switchbox(id) {
+	var elem = document.getElementById(id);
+	if ((elem.name == 'setwarnings[warnon]') && elem.checked)
+		document.warningaction.elements['setwarnings[warnoff]'].checked = false;
+	if ((elem.name == 'setwarnings[warnoff]') && elem.checked)
+		document.warningaction.elements['setwarnings[warnon]'].checked = false;
+}
+//-->
+</SCRIPT>

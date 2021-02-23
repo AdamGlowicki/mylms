@@ -1,0 +1,167 @@
+{extends file="layout.html"}
+{block name=title}::: LMS :{$layout.pagetitle|striphtml} :::{/block}
+{block name=module_content}
+<!--// $Id$ //-->
+<script type="text/javascript">
+<!--
+	function SelectAllCustomers()
+	{
+		if(document.setrights.customers.checked)
+			for (var i = 0; i < document.setrights.elements[0].length; i++)
+				document.setrights.elements[0].options[i].selected = true;
+		else
+			for (var i = 0; i < document.setrights.elements[0].length; i++)
+				document.setrights.elements[0].options[i].selected = false;
+	}
+//-->
+</script>
+<H1>{$layout.pagetitle}</H1>
+<TABLE class="lmsbox">
+	<COLGROUP>
+		<COL style="width: 1%;">
+	<COLGROUP>
+	<TBODY>
+	<TR>
+	<FORM NAME="setdefaultrights" METHOD="POST" ACTION="?m=userpanel&f=submit_rights_default">
+		<TD class="valign-top">
+			<TABLE class="lmsbox-innerbox">
+				<COLGROUP>
+					<COL style="width: 99%;">
+				</COLGROUP>
+				<THEAD>
+				<TR>
+					<TD COLSPAN="3" class="bold">
+						<IMG SRC="img/settings.gif" alt="">&nbsp;{trans("Default Userpanel Rights:")}
+					</TD>
+				</TR>
+				</THEAD>
+				<TBODY>
+				<TR>
+					<TD COLSPAN="3" class="valign-top">
+						<TABLE class="lmsbox">
+							<COLGROUP>
+								<COL style="width: 1%;">
+								<COL style="width: 97%;">
+								<COL style="width: 1%;">
+							</COLGROUP>
+							<THEAD>
+							<TR>
+								<TD class="nobr">{trans("Module:")}</TD>
+								<TD class="nobr"">{trans("Description:")}</TD>
+								<TD>&nbsp;</TD>
+							</TR>
+							</THEAD>
+							<TBODY class="lms-ui-multi-check">
+							{cycle values="light,lucid" print=false}
+							{foreach from=$userpanelrights item=right}
+							<TR class="{cycle advance=false}" onmouseover="addClass(this, 'highlight')" onmouseout="removeClass(this, 'highlight')">
+								<TD class="nobr">{$right.module}</TD>
+								<TD class="nobr"><label for="setdefaultrights{$right.id}">{t}{$right.description}{/t}</label></TD>
+								<TD>
+									<INPUT CLASS="lms-ui-multi-check box {cycle}" TYPE="checkbox" NAME="setdefaultrights[{$right.id}]" ID="setdefaultrights{$right.id}" VALUE="{$right.id}"{if $right.setdefault} CHECKED{/if}>
+								</TD>
+							</TR>
+							{foreachelse}
+							<TR>
+								<TD class="empty-table" colspan="3">
+									<p>{trans("There are any userpanel rights.")}</p>
+								</TD>
+							</TR>
+							{/foreach}
+							</TBODY>
+						</TABLE>
+					</TD>
+				</TR>
+				<TR>
+					<TD class="buttons" COLSPAN="3">
+						<A HREF="javascript:document.setdefaultrights.submit()" accesskey="s">{trans("Submit")} <IMG SRC="img/save.gif" ALT=""></A>
+					</TD>
+				<TR>
+				</TBODY>
+			</TABLE>
+		</TD>
+	</FORM>
+	</TR>
+	<TR>
+	<FORM NAME="setrights" METHOD="POST" ACTION="?m=userpanel&f=submit_rights">
+		<TD class="valign-top">
+			<TABLE class="lmsbox-innerbox">
+				<COLGROUP>
+					<COL style="width: 1%;">
+					<COL style="width: 99%;">
+				</COLGROUP>
+				<THEAD>
+				<TR>
+					<TD class="bold">
+						<IMG SRC="img/{if $layout.lmsv.2 == 6}user{else}customer{/if}.gif" alt="">&nbsp;{trans("Customers:")}
+					</TD>
+					<TD COLSPAN="2" class="bold">
+						<IMG SRC="img/settings.gif" alt="">&nbsp;{trans("Userpanel Rights:")}
+					</TD>
+				</TR>
+				</THEAD>
+				<TBODY>
+				<TR>
+					<TD>
+						<SELECT size="20" name="setrights[mcustomerid][]" multiple {tip text="Select customers"}>
+							{foreach $customerlist as $item}
+							<OPTION value="{$item.id}">{$item.customername|truncate:50:" ..."} ({$item.id|string_format:"%04d"})</OPTION>
+							{/foreach}
+						</SELECT>
+					</TD>
+					<TD COLSPAN="2" class="valign-top">
+						<TABLE class="lmsbox">
+							<COLGROUP>
+								<COL style="width: 1%;">
+								<COL style="width: 97%;">
+								<COL style="width: 1%;">
+							</COLGROUP>
+							<THEAD>
+							<TR>
+								<TD class="nobr">{trans("Module:")}</TD>
+								<TD class="nobr">{trans("Description:")}</TD>
+								<TD>&nbsp;</TD>
+							</TR>
+							</THEAD>
+							<TBODY class="lms-ui-multi-check">
+							{cycle values="light,lucid" print=false}
+							{foreach $userpanelrights as $right}
+							<TR class="{cycle advance=false}" onmouseover="addClass(this, 'highlight')" onmouseout="removeClass(this, 'highlight')">
+								<TD class="nobr">{$right.module}</TD>
+								<TD class="nobr">
+									{t}{$right.description}{/t}
+								</TD>
+								<TD>
+									<INPUT CLASS="lms-ui-multi-check box {cycle}" TYPE="checkbox" NAME="setrights[rights][{$right.id}]" ID="setrightsrights{$right.id}" VALUE="{$right.id}">
+								</TD>
+							</TR>
+							{foreachelse}
+							<TR>
+								<TD class="empty-table" colspan="3">
+									<p>{trans("There are any userpanel rights.")}</p>
+								</TD>
+							</TR>
+							{/foreach}
+							</TBODY>
+						</TABLE>
+					</TD>
+				</TR>
+				<TR>
+					<TD>
+						<label>
+							<INPUT TYPE="checkbox" NAME="customers" CLASS="box light" onchange="SelectAllCustomers()"></INPUT>
+							{trans("Select All")}
+						</label>
+					</TD>
+					<TD COLSPAN="2" class="buttons">
+						<A HREF="javascript:document.setrights.submit()" accesskey="s">{trans("Submit")} <IMG SRC="img/save.gif" ALT=""></A>
+					</TD>
+				<TR>
+				</TBODY>
+			</TABLE>
+		</TD>
+	</FORM>
+	</TR>
+	</TBODY>
+</TABLE>
+{/block}

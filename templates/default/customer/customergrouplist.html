@@ -1,0 +1,86 @@
+{extends file="layout.html"}
+{block name=title}LMS: {$layout.pagetitle|striphtml}{/block}
+{block name=module_content}
+<!--// $Id$ //-->
+<H1>{$layout.pagetitle}</H1>
+<TABLE class="lmsbox lms-ui-background-cycle">
+	<COLGROUP>
+		<COL style="width: 97%;">
+		<COL style="width: 1%;">
+		<COL style="width: 1%;">
+		<COL style="width: 1%;">
+	</COLGROUP>
+	<THEAD>
+	<TR>
+		<TD scope="col" class="nobr">
+			<IMG src="img/group.gif" alt=""> {trans("Name:")}<BR>
+			<span class="lighter"><IMG src="img/info1.gif" alt=""> {trans("Description:")}</span>
+		</TD>
+		<TD scope="col" class="text-right lighter">
+			{trans("ID:")}
+		</TD>
+		<TD scope="col" class="text-right lighter">
+			{trans("Members:")}
+		</TD>
+		<TD scope="col" class="text-right nobr">
+			<span class="text-right"><A HREF="?m=customergroupadd"><IMG src="img/group.gif"> {trans("Add group")}</A></span><BR>{t a=$listdata.total|default:"0"}Total: $a{/t}
+		</TD>
+	</TR>
+	</THEAD>
+	<TFOOT>
+	<TR>
+		<TD colspan="4" class="text-right bold nobr">
+			<IMG src="img/info2.gif" alt=""> {trans("Total:")}
+			{$listdata.totalcount|default:"0"}
+		</TD>
+	</TR>
+	</TFOOT>
+	<TBODY>
+	{foreach $customergrouplist as $customergroup}
+	<TR class="highlight" data-target-url="?m=customergroupinfo&id={$customergroup.id}" data-name="{$customergroup.name}">
+		<TD>
+			<IMG src="img/group.gif" alt="">&nbsp;<span class="bold">{$customergroup.name}</span><BR>
+			{if $customergroup.description}<IMG src="img/info1.gif" alt="">&nbsp;{$customergroup.description|escape|replace:"\n":"<BR>"}{/if}
+		</TD>
+		<TD class="text-right">
+			({$customergroup.id|string_format:"%04d"})
+		</TD>
+		<TD class="text-right">
+			{$customergroup.customerscount}
+		</TD>
+		<TD class="lms-ui-buttons text-right nobr">
+			{if $customergroup.customerscount}
+			<A class="delete-group-alert">
+			{else}
+			<A class="delete-group" href="?m=customergroupdel&id={$customergroup.id}">
+			{/if}
+			<IMG src="img/delete.gif" alt="{trans("Delete")}" title="{trans("Delete")}"></A>
+			<A href="?m=customergroupedit&amp;id={$customergroup.id}"><IMG src="img/edit.gif" alt="{trans("Edit")}" title="{trans("Edit")}"></A>
+			<A href="?m=customergroupinfo&amp;id={$customergroup.id}"><IMG src="img/info.gif" alt="{trans("Info")}" title="{trans("Info")}"></A>
+		</TD>
+	</TR>
+	{foreachelse}
+	<TR>
+		<TD colspan="4" class="empty-table">
+			<p>{trans("There are no such groups in database.")}</p>
+		</TD>
+	</TR>
+	{/foreach}
+	</TBODY>
+</TABLE>
+	<script>
+		$('.delete-group').click(function() {
+			var name = $(this).closest('tr').attr('data-name');
+			console.log('name=', name);
+			confirmDialog($t("Are you sure, you want to remove group '$a'?", name), this).done(function() {
+				location.href = $(this).attr('href');
+			});
+			return false;
+		});
+		$('.delete-group-alert').click(function() {
+			var name = $(this).closest('tr').attr('data-name');
+			alertDialog($t("Group '$a' has members and cannot be deleted!", name), this);
+				return;
+		});
+	</script>
+{/block}

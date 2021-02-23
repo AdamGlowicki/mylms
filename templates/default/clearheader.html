@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<!--// $Id$ //-->
+<html>
+<head>
+<meta name="GENERATOR" content="LMS {$layout.lmsv}">
+{include file="language.html"}
+<title>LMS – {if $layout.pagetitle != ""}{$layout.pagetitle}{/if}</title>
+<link href="css/style_print.css" rel="stylesheet" type="text/css">
+</head>
+<body{if $landscape} class="landscape"{/if}{if preg_match('/report/i', ConfigHelper::getConfig('phpui.printer_window'))} onload="window.print()"{/if}>

@@ -1,0 +1,199 @@
+{extends file="layout.html"}
+{block name=title}LMS: {$layout.pagetitle|striphtml}{/block}
+{block name=module_content}
+<!--// $Id$ //-->
+<H1>{$layout.pagetitle}</H1>
+<TABLE class="lmsbox lms-ui-background-cycle">
+	<COLGROUP>
+		<COL style="width: 1%;">
+		<COL style="width: 1%;">
+		<COL style="width: 96%;">
+		<COL style="width: 1%;">
+		<COL style="width: 1%;">
+	</COLGROUP>
+    <THEAD>
+	<TR>
+		<TD class="nobr">
+			<A href="?m=messagelist&amp;o=cdate{if $listdata.direction == "asc" && $listdata.order == "cdate"},desc{/if}">{trans("Date:")}</A> {if $listdata.order == "cdate"}<IMG src="img/{if $listdata.direction == "desc"}asc{else}desc{/if}_order.gif" alt="">{/if}
+		</TD>
+		<TD class="nobr">
+		</TD>
+		<TD class="nobr">
+			<A href="?m=messagelist&amp;o=subject{if $listdata.direction == "asc" && $listdata.order == "number"},desc{/if}">{trans("Subject:")}</A> {if $listdata.order == "subject"}<IMG src="img/{if $listdata.direction == "desc"}asc{else}desc{/if}_order.gif" alt="">{/if}
+		</TD>
+		<TD class="nobr">
+			<A href="?m=messagelist&amp;o=cnt{if $listdata.direction == "asc" && $listdata.order == "cnt"},desc{/if}">{trans("Recipients:")}</A> {if $listdata.order == "cnt"}<IMG src="img/{if $listdata.direction == "desc"}asc{else}desc{/if}_order.gif" alt="">{/if}
+		</TD>
+		<TD class="bold nobr">
+			{t a=$listdata.total}Total: $a{/t}&nbsp;
+		</TD>
+	</TR>
+	<TR>
+		<TD colspan="5" class="nobr">
+			<FORM METHOD="POST" NAME="page" action="?m=messagelist" id="messagelist">
+			<INPUT type="submit" class="hiddenbtn">
+			<div class="lms-ui-filter-container">
+				<div class="lms-ui-filter-definition">
+					<label>
+						<strong>{trans("Filter:")}</strong>
+						<INPUT type="text" name="search" value="{$listdata.search}" {tip text="Enter value of searching data and select category"}>&nbsp;
+						<SELECT size="1" name="cat">
+							<OPTION value=""{if $listdata.cat == ""} SELECTED{/if}>{trans("- select filter category -")}</OPTION>
+							<OPTION value="subject"{if $listdata.cat == "subject"} SELECTED{/if}>{trans("subject")}</OPTION>
+							<OPTION value="name"{if $listdata.cat == "name"} SELECTED{/if}>{trans("customer name")}</OPTION>
+							<OPTION value="customerid"{if $listdata.cat == "customerid"} SELECTED{/if}>{trans("customer ID")}</OPTION>
+							<OPTION value="username"{if $listdata.cat == "username"} SELECTED{/if}>{trans("user name")}</OPTION>
+							<OPTION value="userid"{if $listdata.cat == "userid"} SELECTED{/if}>{trans("user ID")}</OPTION>
+							<OPTION value="destination"{if $listdata.cat == "destination"} SELECTED{/if}>{trans("destination number/email")}</OPTION>
+							<OPTION value="date"{if $listdata.cat == "date"} SELECTED{/if}>{trans("date (YYYY/MM/DD)")}</OPTION>
+						</SELECT>
+					</label>
+					<label>
+						{trans("Type:")}
+						<SELECT size="1" name="type">
+							<OPTION value="0"{if !$listdata.type} SELECTED{/if}>{trans("- all types -")}</OPTION>
+							<OPTION value="{$smarty.const.MSG_MAIL}"{if $listdata.type == $smarty.const.MSG_MAIL} SELECTED{/if}>{trans("email")}</OPTION>
+							<OPTION value="{$smarty.const.MSG_SMS}"{if $listdata.type == $smarty.const.MSG_SMS} SELECTED{/if}>{trans("sms")}</OPTION>
+							<OPTION value="{$smarty.const.MSG_ANYSMS}"{if $listdata.type == $smarty.const.MSG_ANYSMS} SELECTED{/if}>{trans("any sms")}</OPTION>
+							<OPTION value="{$smarty.const.MSG_WWW}"{if $listdata.type == $smarty.const.MSG_WWW} SELECTED{/if}>{trans("www")}</OPTION>
+							<OPTION value="{$smarty.const.MSG_USERPANEL}"{if $listdata.type == $smarty.const.MSG_USERPANEL} SELECTED{/if}>{trans("userpanel")}</OPTION>
+							<OPTION value="{$smarty.const.MSG_USERPANEL_URGENT}"{if $listdata.type == $smarty.const.MSG_USERPANEL_URGENT} SELECTED{/if}>{trans("userpanel urgent")}</OPTION>
+						</SELECT>
+					</label>
+					<label>
+						{trans("Status:")}
+						<SELECT size="1" name="status">
+							<OPTION value=""{if !$listdata.status} SELECTED{/if}>{trans("- all statuses -")}</OPTION>
+							<OPTION value="{$smarty.const.MSG_NEW}"{if $listdata.status == $smarty.const.MSG_NEW} SELECTED{/if}>{trans("waiting<!plural>")}</OPTION>
+						{*
+							<OPTION value="{$smarty.const.MSG_DRAFT}"{if $listdata.status == $smarty.const.MSG_DRAFT} SELECTED{/if}>{trans("drafts")}</OPTION>
+						*}
+							<OPTION value="{$smarty.const.MSG_SENT}"{if $listdata.status == $smarty.const.MSG_SENT} SELECTED{/if}>{trans("sent<!plural>")}</OPTION>
+							<OPTION value="{$smarty.const.MSG_ERROR}"{if $listdata.status == $smarty.const.MSG_ERROR} SELECTED{/if}>{trans("errornous<!plural>")}</OPTION>
+							<OPTION value="{$smarty.const.MSG_DELIVERED}"{if $listdata.status == $smarty.const.MSG_DELIVERED} SELECTED{/if}>{trans("delivered<!plural>")}</OPTION>
+						</SELECT>
+						<A href="javascript: document.page.submit();">&raquo;&raquo;&raquo;</A>
+					</label>
+				</div>
+				</FORM>
+			</div>
+		</TD>
+	</TR>
+	{if $pagination->getTotal() != 0}
+	<TR>
+		<TD class="lms-ui-pagination" COLSPAN="5">
+			{include file="pagination.html" form="messagelist"}
+		</TD>
+	</TR>
+	{/if}
+    </THEAD>
+    <TBODY class="lms-ui-multi-check">
+	<form method="post" name="messages">
+	{foreach $messagelist as $message}
+	<TR class="highlight{if $message.error > 0} lms-ui-alert{elseif $message.error} blendalert{elseif $message.delivered == $message.cnt} green{elseif $message.sent == $message.cnt} blend{/if}"
+		data-target-url="?m=messageinfo&id={$message.id}"
+		data-popup-menu-title="{t a=$message.id|string_format:"%d"}Message #$a{/t}"
+	>
+		<TD class="nobr">
+			{$message.cdate|date_format:"%Y/%m/%d %H:%M"}
+		</TD>
+		<TD class="text-center nobr">
+			{if $message.type == $smarty.const.MSG_MAIL}
+				<i class="lms-ui-icon-mail"></i>
+			{elseif $message.type == $smarty.const.MSG_WWW}
+				<i class="lms-ui-icon-web"></i>
+			{elseif $message.type == $smarty.const.MSG_USERPANEL || $message.type == $smarty.const.MSG_USERPANEL_URGENT}
+				<i class="lms-ui-icon-userpanel"></i>
+			{else}
+				<i class="lms-ui-icon-sms"></i>
+			{/if}
+		</TD>
+		<TD class="bold">
+			{$message.subject|escape}
+		</TD>
+		<TD class="lms-ui-buttons text-right nobr">
+			{$message.cnt|default:0}
+		</TD>
+		<TD class="lms-ui-buttons text-right nobr">
+			{if $message.files}
+				{button class="toggle-file-list" type="link" icon="fileupload" tip="Show file list" resourceid={$message.filecontainerid}}
+			{/if}
+			{buttons}
+				{button type="link" icon="delete" class="delete-message" tip="Delete" href="?m=messagedel&id={$message.id}"}
+				{button type="link" icon="info" tip="Info" onclick="location.href = '?m=messageinfo&id={$message.id}';"}
+				{button type="link" icon="resend" tip="Resend" onclick="location.href = '?m=messageadd&messageid={$message.id}';"}
+			{/buttons}
+			<input type="checkbox" name="marks[{$message.id}]" value="{$message.id}" class="lms-ui-multi-check"{if $marks.messageid} checked{/if}>
+			<div id="files-{$message.filecontainerid}" style="display: none;" class="files">
+				{foreach $message.files as $file}
+					{documentview id="{$message.id}-{$file.id}" type=$file.contenttype name=$file.filename
+					url="?m=attachments&attachmentaction=viewfile&type=messageid&id={$message.filecontainerid}&fileid={$file.id}" external=true
+					text="{$file.filename} <i class=\"lms-ui-icon-view{if preg_match('/pdf/',$file.contenttype)} pdf{elseif preg_match('/csv|excel|spreadsheet/',$file.contenttype)} xls{/if}\"></i>"}
+					<br>
+				{/foreach}
+			</div>
+		</TD>
+	</TR>
+	{foreachelse}
+	<TR>
+		<TD colspan="5" class="empty-table">
+			<p>{trans("No such messages in database.")}</p>
+		</TD>
+	</TR>
+	{/foreach}
+	</form>
+    </TBODY>
+    <TFOOT>
+	{if $pagination->getTotal() != 0}
+	<TR>
+		<TD class="lms-ui-pagination" COLSPAN="5">
+			{include file="pagination.html" form="messagelist"}
+		</TD>
+	</TR>
+	{/if}
+	<TR>
+		<TD colspan="2" class="nobr">
+		</TD>
+		<TD class="bold">
+			{t a=$listdata.total}Total: $a{/t}
+		</TD>
+		<TD colspan="2" class="text-right nobr">
+			{button icon="delete" id="delete-messages" label="Delete" tip="Delete"}
+			<label>
+				{trans("Check All")}
+				<INPUT TYPE="checkbox" NAME="allbox" class="lms-ui-multi-check-all" VALUE="1">
+			</label>
+		</TD>
+	</TR>
+    </TFOOT>
+</TABLE>
+
+<script>
+
+	$('.delete-message').click(function() {
+		confirmDialog($t("Are you sure, you want to delete that message?"), this).done(function() {
+			location.href = $(this).attr('href');
+		});
+		return false;
+	});
+
+	$('#delete-messages').click(function() {
+		if ($(this).closest('tfoot').siblings('tbody.lms-ui-multi-check').find('input:checked').length) {
+			confirmDialog($t("Are you sure, you want to delete all selected messages?"), this).done(function() {
+				$('form[name=messages]').attr('action', '?m=messagedel').submit();
+			});
+		}
+		return false;
+	});
+
+	$(function () {
+		$('.toggle-file-list').click(function () {
+			var containerid = parseInt($(this).attr('data-resourceid'));
+			var elem = $('#files-' + containerid);
+			elem.toggle();
+		});
+	});
+
+</script>
+
+{/block}

@@ -1,0 +1,121 @@
+{extends file="layout.html"}
+{block name=title}LMS: {$layout.pagetitle|striphtml}{/block}
+{block name=module_content}
+<!-- $Id$ -->
+<H1>{$layout.pagetitle}</H1>
+<TABLE class="lmsbox lms-ui-background-cycle">
+	<COLGROUP>
+		<COL style="width: 1%;">
+		<COL style="width: 1%;">
+		<COL style="width: 94%;">
+		<COL style="width: 1%;">
+		<COL style="width: 1%;">
+		<COL style="width: 1%;">
+		<COL style="width: 1%;">
+	</COLGROUP>
+    <THEAD>
+	<TR>
+		<TD class="bold nobr">
+			{icon name="money" class="fa-fw"} {trans("Name:")} ({trans("Effective date")})
+		</TD>
+		<TD class="text-right nobr">
+			{trans("ID:")}
+		</TD>
+		<TD>
+			{trans("Description:")}
+		</TD>
+		<TD class="text-right nobr">
+			{trans("Schemas:")}
+		</TD>
+		<TD class="text-right nobr">
+			{trans("Tariffs:")}
+		</TD>
+		<TD class="text-right nobr">
+			{trans("Assignments:")}
+		</TD>
+		<TD class="text-right nobr">
+			{button icon="add" label="Add promotion" href="?m=promotionadd"}
+		</TD>
+	</TR>
+    </THEAD>
+    <TBODY>
+	{foreach $promotionlist as $promo}
+	<TR class="highlight {if $promo.disabled} blend{/if}{if $promo.deleted} lms-ui-resource-deleted{/if}" data-name="{$promo.name}">
+		<TD nowrap onClick="return self.location.href='?m=promotioninfo&amp;id={$promo.id}';">
+			{icon name="money" class="fa-fw"} <B>{$promo.name}</B>
+			{if $promo.datefrom || $promo.dateto}
+				{if $promo.datefrom}
+				({trans("from:")} {$promo.datefrom|date_format:"%Y/%m/%d"}{if !$promo.dateto}){/if}
+				{/if}
+				{if $promo.dateto}
+				{if !$promo.datefrom}({/if}{trans("to:")} {$promo.dateto|date_format:"%Y/%m/%d"})
+				{/if}
+			{/if}
+		</TD>
+		<TD class="text-right">
+			({$promo.id|string_format:"%04d"})
+		</TD>
+		<TD onClick="return self.location.href='?m=promotioninfo&amp;id={$promo.id}';">
+			{$promo.description}
+		</TD>
+		<TD class="text-right" onClick="return self.location.href='?m=promotioninfo&amp;id={$promo.id}';">
+			{$promo.scs|default:"-"}
+		</TD>
+		<TD class="text-right" onClick="return self.location.href='?m=promotioninfo&amp;id={$promo.id}';">
+			{$promo.tariffs|default:"-"}
+		</TD>
+		<TD class="text-right nobr">
+			{$promo.assignments|default:"-"}
+		</TD>
+		<TD class="text-right nobr">
+			{if !$promo.deleted}
+				{if $promo.disabled}
+					{button type="link" icon="disconnected" tip="Enable" href="?m=promotionset&id={$promo.id}&access={$promo.disabled}"}
+				{else}
+					{button type="link" icon="connected" tip="Disable" href="?m=promotionset&id={$promo.id}&access={$promo.disabled}"}
+				{/if}
+			{/if}
+			{if !$promo.deleted || !$promo.assignments}
+				{button type="link" icon="delete" tip="Delete" href="?m=promotiondel&id={$promo.id}"}
+			{/if}
+			{button type="link" icon="clone" tip="Clone" href="?m=promotionclone&id={$promo.id}"}
+			{if !$promo.deleted}
+				{button type="link" icon="edit" tip="Edit" href="?m=promotionedit&id={$promo.id}"}
+			{/if}
+			{button type="link" icon="info" tip="Info" href="?m=promotioninfo&id={$promo.id}"}
+		</TD>
+	</TR>
+	{foreachelse}
+	<TR>
+		<TD colspan="7" class="empty-table">
+			<p>{trans("There are no promotions in database.")}</p>
+		</TD>
+	</TR>
+	{/foreach}
+    </TBODY>
+    <TFOOT>
+	<TR>
+		<TD COLSPAN="2" class="bold text-right">
+			{icon name="optional-info" class="fa-fw"}
+			{trans("Total:")}
+		</TD>
+		<TD class="bold nobr">
+			{$listdata.total|default:"0"}
+		</TD>
+		<TD COLSPAN="3"></TD>
+		<TD class="text-right">
+			{button icon="add" label="Add promotion" href="?m=promotionadd"}
+		</TD>
+	</TR>
+    </TFOOT>
+</TABLE>
+	<script>
+		$('.delete-promotion').click(function() {
+			var name = $(this).closest('tr').attr('data-name');
+			confirmDialog($t("Are you sure, you want to remove promotion '$a'?", name), this).done(function() {
+				location.href = $(this).attr('href');
+			});
+			return false;
+		});
+	</script>
+{/block}

@@ -1,0 +1,127 @@
+<TABLE class="lmsbox-inner" id="table">
+	<COLGROUP>
+		<COL style="width: 1%;">
+		<COL style="width: 99%;">
+	</COLGROUP>
+	<THEAD>
+	<TR>
+		<TD class="bold" colspan="2">
+			{icon name="helpdesk" class="fa-fw"} {t a=$ticket.ticketid|string_format:"%06d"}Ticket No. $a{/t}
+		</TD>
+	</TR>
+	</THEAD>
+	<TBODY>
+	{if $ticket.creatorid}
+	<TR>
+		<TD class="bold nobr">
+			{icon name="user" label="Created by:" class="fa-fw"}
+		</TD>
+		<TD>
+			<A href="?m=userinfo&id={$ticket.creatorid}">{$ticket.creator}</a>
+		</TD>
+	</TR>
+	{/if}
+	{if $ticket.createtime}
+	<TR>
+		<TD class="bold nobr">
+			{icon name="uptime" label="Creation time:" class="fa-fw"}
+		</TD>
+		<TD>
+			{$ticket.createtime|date_format:"%Y/%m/%d %H:%M:%S"}
+		</TD>
+	</TR>
+	{/if}
+	{if $ticket.invprojectid}
+	<TR>
+		<TD class="bold nobr">
+			{icon name="money" label="Investment project:" class="fa-fw"}
+		</TD>
+		<TD>
+			{$ticket.invproject_name} ({$ticket.invprojectid})
+		</TD>
+	</TR>
+	{/if}
+	<TR>
+		<TD class="bold nobr">
+			{icon name="uptime" label="Uptime:" class="fa-fw"}
+		</TD>
+		<TD>
+			{$ticket.uptime}
+		</TD>
+	</TR>
+	<TR>
+		<TD class="bold nobr">
+			{icon name="cause" label="Cause:" class="fa-fw"}
+		</TD>
+		<TD>
+			{if $ticket.cause==2}{trans("company's side")}
+			{elseif $ticket.cause==1}{trans("customer's side")}
+			{else}{trans("unknown/other")}{/if}
+		</TD>
+	</TR>
+	<TR>
+		<TD class="bold nobr">
+			{icon name="priority" label="Priority:" class="fa-fw"}
+		</TD>
+		<TD>
+			{$_RT_PRIORITIES[$ticket.priority]}
+		</TD>
+	</TR>
+	{if $ticket.parentid}
+	<TR>
+		<TD class="bold nobr">
+			{icon name="parentticket" label="Parent ticket:"}
+		</TD>
+		<TD>
+			<A href="?m=rtticketview&id={$ticket.parentid}">{t a=$ticket.parentid|string_format:"%06d"}$a{/t}</A><br>
+		</TD>
+	</TR>
+	{/if}
+	{if $ticket.relatedtickets}
+	<TR>
+		<TD class="bold nobr">
+			{icon name="relatedticket" label="Related tickets:"}
+		</TD>
+		<TD>
+			{foreach $ticket.relatedtickets as $i}
+				<A href="?m=rtticketview&id={$i.id}">#{$i.id|string_format:"%06d"} {$i.subject}</A><br>
+			{/foreach}
+		</TD>
+	</TR>
+	{/if}
+	{if $ticket.childtickets}
+	<TR>
+		<TD class="bold nobr">
+			{icon name="childticket" label="Child tickets:" class="fa-fw"}
+		</TD>
+		<TD>
+			{foreach $ticket.childtickets as $i}
+			<A href="?m=rtticketview&id={$i.id}">#{$i.id|string_format:"%06d"} {$i.subject}</A><br>
+			{/foreach}
+		</TD>
+	</TR>
+	{/if}
+	{if $ticket.message}
+	<TR>
+		<TD class="bold">
+			{icon name="info" label="Body:" class="fa-fw"}
+		</TD>
+		<TD class="fall superlight">
+			{if $ticket.contenttype == 'text/html'}
+				{$ticket.message}
+			{else}
+				{$ticket.message|escape|replace:"\n":"<BR>"}
+			{/if}
+		</TD>
+	</TR>
+	{/if}
+	<TR>
+		<TD colspan="2" class="lms-ui-box-buttons">
+		{if ($event.ticket.state != $smarty.const.RT_RESOLVED || ($event.ticket.state == $smarty.const.RT_RESOLVED && $aet && ($smarty.now - $event.ticket.resolvetime) < $aet)) || (ConfigHelper::checkPrivilege('superuser'))}
+			{button type="link-button" icon="message" label="New Message" href="?m=rtmessageadd&ticketid={$ticket.ticketid}"}
+		{/if}
+		{button type="link-button" icon="note" label="New Note" href="?m=rtnoteadd&ticketid={$ticket.ticketid}"}
+		</TD>
+	</TR>
+	</TBODY>
+</TABLE>

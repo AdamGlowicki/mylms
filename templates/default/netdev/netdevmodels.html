@@ -1,0 +1,281 @@
+{extends file="layout.html"}
+{block name=title}LMS: {$layout.pagetitle|striphtml}{/block}
+{block name=module_content}
+
+{$xajax}
+<!--// $Id$ //-->
+<H1>{$layout.pagetitle}</H1>
+
+<div id="div_produceredit" style="display:none">
+    <form name="produceredit" id="produceredit" method="POST">
+    <input type="hidden" name="produceredit[id]" value="{$produceredit.id}" id="id_producer">
+	<table width="100%" cellpadding="3" class="lmsbox">
+		<colgroup>
+			<col style="width: 1%;">
+			<col style="width: 99%;">
+		</colgroup>
+		<thead>
+			<tr>
+				<td class="bold" colspan="2">
+					<span id="id_action_name">{trans("New producer")}</span>
+				</td>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td class="fleft nobr">
+					{trans("Producer name")}
+				</td>
+				<td>
+					{trans("Alternative name (optional)")}
+				</td>
+			</tr>
+			<tr>
+				<td class="fleft nobr valign-top">
+					<input type="text" name="produceredit[name]" style="width:250px" id="id_producername" value="{$produceredit.name}" required {tip trigger="name" text="Enter producer name"}>
+				</td>
+				<td class="fright valign-top">
+					<input type="text" name="produceredit[alternative_name]" style="width:550px" id="id_alternative_name" value="{$produceredit.alternative_name}">
+				</td>
+			</tr>
+			<tr>
+				<td class="lms-ui-box-buttons" colspan="2">
+					{block name="netdevproducer-buttons"}
+						{button icon="save" label="Save" onclick="xajax_save_producer(xajax.getFormValues('produceredit'));"}
+						{button icon="cancel" label="Cancel" onclick="xajax_cancel_producer();"}
+					{/block}
+				</td>
+			</tr>
+		</tbody>
+	</table>
+    </form>
+    <br>
+</div>
+
+<script>
+	function delproducer(id) {
+		confirmDialog($t("Producer removal will cause removal of all assigned models! Are you sure you want to continue?"), $('#delete-producer')).done(function() {
+			xajax_delete_producer(id);
+		});
+		return false;
+	}
+</script>
+
+<form name="producer" id="producer" method="GET" action="?m=netdevmodels">
+<input type="submit" class="hiddenbtn">
+<input type="hidden" name="m" value="netdevmodels">
+<input type="hidden" name="page" value="1">
+	<table width="100%" cellpadding="3" class="lmsbox">
+		<colgroup>
+			<col style="width: 99%;">
+			<col style="width: 1%;">
+		</colgroup>
+		<thead>
+		<tr>
+			<td class="bold" colspan="2">
+				{trans("Producers")}
+			</td>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<td>
+				<select name="p_id" style="min-width:250px;" onchange="document.producer.submit();" {tip text="Select producer" trigger="p_id"}>
+					<option value="">- {trans("none")} -</option>
+					{section name="producerlist" loop=$producerlist}
+					<option value="{$producerlist[producerlist].id}"{if $listdata.pid == $producerlist[producerlist].id} selected{/if}>
+						{$producerlist[producerlist].name}
+					</option>
+					{/section}
+				</select>
+				{if $producerinfo.alternative_name}<span title="Alternatywna nazwa producenta">{$producerinfo.alternative_name}</span>{/if}
+			</td>
+			<td class="nobr text-right">
+				{block name="netdevmodel-producer-buttons"}
+				{if $listdata.pid}
+					{button id="delete-producer" icon="delete" label="Delete" onclick="delproducer({$listdata.pid});"}
+					{button icon="edit" label="Edit" onclick="xajax_edit_producer({$listdata.pid});"}
+				{/if}
+				{/block}
+			</td>
+		</tr>
+		<tr class="lms-ui-button-panel">
+			<td colspan="2" class="fall text-right">
+				{button icon="add" label="Add producer" onclick="xajax_add_producer();"}
+			</td>
+		</tr>
+		</tbody>
+	</table>
+</form>
+<br>
+
+<div id="div_modeledit" style="display:none;">
+    <form name="modeledit" id="modeledit" method="POST">
+    <input type="hidden" name="modeledit[id]" value="{$modeledit.id}" id="id_model">
+    <input type="hidden" name="modeledit[pid]" value="{$listdata.pid}" id="id_pid">
+	<table width="100%" cellpadding="3" class="lmsbox">
+		<colgroup>
+			<col style="width: 1%;">
+			<col style="width: 1%;">
+			<col style="width: 98%;">
+		</colgroup>
+		<tr>
+			<td width="100%" class="bold" colspan="3">
+				<span id="id_model_action_name">{trans("New model")}</span>
+			</td>
+		</tr>
+		<tr>
+			<td class="nobr">
+				{trans("Model name")}
+			</td>
+			<td>
+				{trans("Alternative name (optional)")}
+			</td>
+			<td>
+				{trans("Type")}
+			</td>
+		</tr>
+		<tr>
+			<td class="nobr valign-top">
+				<input type="text" name="modeledit[name]" style="width:250px" id="id_model_name" value="{$modeledit.name}" {tip text="Enter model name" trigger="name"}>
+			</td>
+			<td class="valign-top">
+				<input type="text" name="modeledit[alternative_name]" style="width:550px" id="id_model_alternative_name" value="{$modeledit.alternative_name}">
+			</td>
+			<td class="valign-top">
+				{networkdevicetypes elemname="modeledit[type]" id="id_model_type" selected=$modeledit.type}
+			</td>
+		</tr>
+		<tr>
+			<td class="lms-ui-box-buttons" colspan="3">
+				{block name="netdevmodel-buttons"}
+					{button icon="save" label="Save" onclick="xajax_save_model(xajax.getFormValues('modeledit'));"}
+					{button icon="cancel" label="Cancel" onclick="xajax_cancel_model();"}
+				{/block}
+			</td>
+		</tr>
+	</table>
+    </form>
+	<br>
+	<div id="netdevmodel-attachements"></div>
+    <br>
+</div>
+
+
+{if $modellist}
+<table width="100%" cellpadding="3" class="lmsbox lms-ui-background-cycle" cellspacing="3px">
+	<colgroup>
+		<col style="width: 1%;">
+		<col style="width: 96%;">
+		<col style="width: 1%;">
+		<col style="width: 1%;">
+		<col style="width: 1%;">
+	</colgroup>
+	<thead>
+	<tr>
+		<td class="bold" colspan="4">
+			{trans("Model list")}
+		</td>
+		<td class="text-right nobr bold">
+			{trans("Total:")} {$listdata.total}
+		</td>
+	</tr>
+	</thead>
+	<tbody>
+	{if $listdata.total != 0}
+	<tr>
+		<td colspan="5" class="lms-ui-pagination dark fall">
+			{include file="scroller.html" loop=$modellist}
+		</td>
+	</tr>
+	{/if}
+	<tr class="lms-ui-header-panel">
+		<td class="nobr bold" style="min-width:150px;">{trans("Name")}</td>
+		<td class="bold">{trans("Alternative name")}</td>
+		<td class="bold">{trans("Type")}</td>
+		<td class="text-center nobr bold">{trans("Network devices")}</td>
+		<td class="text-right nobr">
+			{button icon="add" label="Add model" onclick="xajax_add_model();"}
+		</td>
+	</tr>
+	{section name=modellist loop=$modellist start=$start max=$pagelimit}
+	{assign var="model" value=$modellist[modellist]}
+	<tr id="idtr{$model.id}" onmouseover="addClass(this, 'highlight')" onmouseout="removeClass(this, 'highlight')">
+		<td class="nobr">{$model.name}</td>
+		<td>{$model.alternative_name}</td>
+		<td>{if $model.type}{trans($model.typename)}{/if}</td>
+		<td class="text-center nobr">{if $model.netdevcount}{$model.netdevcount}{/if}</td>
+		<td class="lms-ui-buttons text-right nobr">
+			{if $model.filecontainers}
+				{foreach $model.filecontainers as $filecontainer}
+					{if $filecontainer.files}
+						{button class="models-toggle-file-list" type="link" icon="fileupload" tip="Show file list" resourceid={$filecontainer.id} label="{$filecontainer.description|default:'---'}"}
+					{/if}
+					<div id="listfiles-{$filecontainer.id}" style="display: none;" class="files">
+						{foreach $filecontainer.files as $file}
+							{documentview id="{$filecontainer.id}-{$file.id}" type=$file.contenttype name=$file.filename
+							url="?m=attachments&attachmentaction=viewfile&type=messageid&id={$model.filecontainerid}&fileid={$file.id}" external=true
+							text="{$file.filename} <img src=\"img/{if preg_match('/pdf/',$file.contenttype)}pdf{elseif preg_match('/csv|excel|spreadsheet/',$file.contenttype)}xls{else}view{/if}.gif\">"}
+							<br>
+						{/foreach}
+					</div>
+				{/foreach}
+			{/if}
+
+			{foreach $model.customlinks as $link}
+				<A {if isset($link.url)} href="{$link.url}" {/if} rel="external" {if isset($link.onclick)} onclick="{$link.onclick}"{/if}>{if isset($link.icon)}<IMG src="{$link.icon}" alt="{$link.label}" {$link.tip}>{else}{$link.label}{/if}</A>
+				{if isset($link.extra)}{$link.extra}{/if}
+			{/foreach}
+
+			{if !$model.netdevcount}
+				{button type="link" icon="delete" tip="Delete" onclick="xajax_delete_model({$model.id});"}
+			{/if}
+			{button type="link" icon="edit" tip="Edit" onclick="xajax_edit_model({$model.id});"}
+
+		</td>
+	</tr>
+	{/section}
+	{if $listdata.total != 0}
+	<tr>
+		<td colspan="5" class="lms-ui-pagination dark fall">
+			{include file="scroller.html" loop=$modellist}
+		</td>
+	</tr>
+	{/if}
+	</tbody>
+</table>
+{/if}
+
+{if !$modellist && $listdata.pid}
+<table width="100%">
+	<tr class="light">
+		<td width="100%" class="fall text-center bold">
+			<br>
+			<p>
+			{trans("There are no models matching to defined filter or model list is empty")}
+			</p>
+			{button icon="add" label="Add new model" onclick="xajax_add_model();"}
+			<br>
+			<br>
+		</td>
+	</tr>
+</table>
+{/if}
+
+	<script>
+		var restore = '{$restore}';
+		var resourceid = '{$resourceid}';
+		if (resourceid) {
+			xajax_edit_model(resourceid);
+		}
+
+	$(function () {
+		$('.models-toggle-file-list').click(function () {
+			var containerid = parseInt($(this).attr('data-resourceid'));
+			var elem = $('#listfiles-' + containerid);
+			elem.toggle();
+		});
+	});
+
+	</script>
+{/block}

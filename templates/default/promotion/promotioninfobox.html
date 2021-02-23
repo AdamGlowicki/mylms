@@ -1,0 +1,60 @@
+<!-- $Id$ -->
+<TABLE class="lmsbox">
+    <THEAD>
+	<TR>
+		<TD WIDTH="1%">
+			{icon name="money" class="fa-fw"}
+		</TD>
+		<TD WIDTH="98%" COLSPAN="2">
+			<B>{$promotion.name} ({$promotion.id|string_format:"%04d"})</B>
+			{if $promotion.deleted} <span class="lms-ui-alert">({trans("deleted promotion")})</span>{/if}
+		</TD>
+	</TR>
+    </THEAD>
+    <TBODY>
+	<TR>
+		<TD WIDTH="1%">
+			{if $promotion.disabled}
+				{button type="link" icon="disconnected" tip="Enable" href="?m=promotionset&id={$promotion.id}&access={$promotion.disabled}"}
+			{else}
+				{button type="link" icon="connected" tip="Disable" href="?m=promotionset&id={$promotion.id}&access={$promotion.disabled}"}
+			{/if}
+		</TD>
+		<TD WIDTH="99%" NOWRAP colspan="2">
+			{if $promotion.disabled}{trans("disabled")}{else}{trans("enabled")}{/if}
+		</TD>
+	</TR>
+	{if $promotion.description}
+	<TR>
+		<TD WIDTH="1%">
+			{icon name="optional-info" class="fa-fw"}
+		</TD>
+		<TD WIDTH="98%" COLSPAN="2">
+			<TABLE WIDTH="100%" CELLPADDING="5">
+			    <TR><TD CLASS="fall superlight">
+				    {$promotion.description|replace:"\n":"<BR>"}
+			    </TD></TR>
+			</TABLE>
+		</TD>
+	</TR>
+	{/if}
+	<TR>
+		<TD colspan="3" class="lms-ui-box-buttons">
+			{if !$promotion.deleted}
+				{button icon="edit" label="Edit" href="?m=promotionedit&id={$promotion.id}"}
+			{/if}
+			{if !$promotion.deleted || !$promotion.assignments}
+				{button icon="delete" label="Delete" id="delete-promotion" data_href="?m=promotiondel&id={$promotion.id}"}
+			{/if}
+		</TD>
+	</TR>
+    </TBODY>
+</TABLE>
+<script>
+	$('#delete-promotion').click(function() {
+		confirmDialog($t("Are you sure, you want to delete this promotion?"), this).done(function() {
+			location.href = $(this).attr('data-href');
+		});
+		return false;
+	});
+</script>

@@ -1,0 +1,109 @@
+{extends file="layout.html"}
+{block name=title}LMS: {$layout.pagetitle|striphtml}{/block}
+{block name=module_content}
+<!--// $Id$ //-->
+<H1>{$layout.pagetitle}</H1>
+<TABLE class="lmsbox lms-ui-background-cycle">
+	<colgroup>
+		<col style="width: 1%;">
+		<col style="width: 1%;">
+		<col style="width: 1%;">
+		<col style="width: 95%;">
+		<col style="width: 1%;">
+		<col style="width: 1%;">
+	</colgroup>
+    <THEAD>
+	<TR>
+		<TD class="bold nobr"><IMG src="img/division.gif" alt=""> {trans("Name:")}</TD>
+		<TD class="bold text-right">{trans("ID:")}</TD>
+		<TD class="text-left nobr">
+			{trans("Text label:")}
+		</TD>
+		<TD class="text-left nobr">
+			{trans("Long name:")}
+		</TD>
+		<TD class="text-right nobr">{trans("Customers:")}</TD>
+		<TD class="text-right nobr">
+			{button type="link-button" icon="add" label="Add division" href="?m=divisionadd"}
+		</TD>
+	</TR>
+	{if $pagination->getTotal() != 0}
+		<TR>
+			<TD class="lms-ui-pagination" COLSPAN="6">
+				{include file="pagination.html"}
+			</TD>
+		</TR>
+	{/if}
+    </THEAD>
+    <TBODY>
+	{foreach $divisionlist as $division}
+	<TR class="{if $division.status} blend{/if}" data-name="{$division.shortname|escape}">
+		<TD class="bold nobr" onclick="return self.location.href='?m=divisionedit&amp;id={$division.id}';">
+			<IMG src="img/division.gif" alt=""> {$division.shortname|escape}
+		</TD>
+		<TD class="text-right nobr" onclick="return self.location.href='?m=divisionedit&amp;id={$division.id}';">
+			({$division.id|string_format:"%04d"})
+		</TD>
+		<td class="text-left">
+			{$division.label|escape|default:"-"}
+		</td>
+		<TD class="text-left" onclick="return self.location.href='?m=divisionedit&amp;id={$division.id}';">
+			{$division.name|escape}
+		</TD>
+		<TD class="text-right" onclick="return self.location.href='?m=divisionedit&amp;id={$division.id}';">
+			{$division.cnt|default:0}
+		</TD>
+		<TD class="lms-ui-buttons text-right nobr">
+			{button type="link" icon="lock" tip="{if $division.status}{trans("Unlock")}{else}{trans("Lock")}{/if}" href="?m=divisionedit&amp;id={$division.id}&amp;changestatus=1"}
+			{if isset($division.unblock_delete)}
+				{button type="link" icon="delete" tip="Delete" class="delete-division" href="?m=divisiondel&id={$division.id}"}
+			{/if}
+			{button type="link" icon="clone" tip="Clone" class="clone-division" href="?m=divisionclone&id={$division.id}"}
+			{button type="link" icon="edit" tip="Edit" href="?m=divisionedit&id={$division.id}"}
+		</TD>
+	</TR>
+	{foreachelse}
+	<TR>
+		<TD colspan="6" class="empty-table">
+			<p>{trans("No such divisions in database.")}</p>
+		</TD>
+	</TR>
+	{/foreach}
+    </TBODY>
+    <TFOOT>
+	{if $pagination->getTotal() != 0}
+		<TR>
+			<TD class="lms-ui-pagination division-context" COLSPAN="6">
+				{include file="pagination.html"}
+			</TD>
+		</TR>
+	{/if}
+    </TFOOT>
+</TABLE>
+
+<script>
+
+	$(function() {
+		$('.division-context').on( 'lms:division_selection', function() {
+			location.reload();
+		});
+
+		$('.delete-division').click(function() {
+			var name = $(this).closest('tr').attr('data-name');
+			confirmDialog($t("Are you sure, you want to delete division '$a'?", name), this).done(function() {
+				location.href = $(this).attr('href');
+			});
+			return false;
+		});
+		$('.clone-division').click(function() {
+			var name = $(this).closest('tr').attr('data-name');
+			confirmDialog($t("Are you sure, you want to clone division '$a'?", name), this).done(function() {
+				location.href = $(this).attr('href');
+			});
+			return false;
+		});
+	});
+
+</script>
+
+{/block}

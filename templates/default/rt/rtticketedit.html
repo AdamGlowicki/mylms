@@ -1,0 +1,33 @@
+{extends file="layout.html"}
+{block name=title}LMS: {$layout.pagetitle|striphtml}{/block}
+{block name=module_content}
+<!-- $Id$ -->
+<H1>{$layout.pagetitle|escape}</H1>
+
+{$xajax}
+
+<FORM method="POST" name="ticket" id="ticket-form" action="?m=rtticketedit&id={$ticket.ticketid}{if isset($backid)}&backid={$backid}{/if}">
+	{include file="rt/rtticketmodify.html"}
+</FORM>
+
+<script>
+
+	$(function() {
+		$('[name="ticket[subject]"]').focus();
+
+		{$category_adjustments=ConfigHelper::checkConfig('phpui.category_adjustments_in_ticketedit')}
+		{if $category_adjustments}
+		$('[name="ticket[queueid]"]').change(function() {
+			xajax_GetCategories($(this).val());
+		});
+		{/if}
+	});
+
+	initCustomerSelection();
+
+</script>
+
+{if $customerinfo}{include file="customer/customerinfobox.html" info_link=true}{/if}
+
+{include file="rt/rtticketmessagesbox.html"}
+{/block}

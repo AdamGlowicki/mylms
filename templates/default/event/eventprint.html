@@ -1,0 +1,94 @@
+{include file="clearheader.html"}
+<!--// $Id$ //-->
+<TABLE WIDTH="100%">
+	<COLGROUP>
+		<COL style="width: 50%;">
+		<COL style="width: 50%;">
+	</COLGROUP>
+	<TR>
+		<TD class="text-left nobr">
+			<H1>{$layout.pagetitle}: {$date|date_format:"%x (%A)"}</H1>
+		</TD>
+		<TD class="text-right">
+			LMS {$layout.lmsv} @ {$layout.hostname} {$smarty.now|date_format:"%A %e %B %Y"}<BR>
+			{t a=$layout.logname}Prepared by: $a{/t}
+		</TD>
+	</TR>
+</TABLE>
+<TABLE WIDTH="100%" CELLPADDING="3" BORDER="1" ALIGN="CENTER">
+	<COLGROUP>
+		<COL style="width: 1%;">
+		<COL style="width: 4%;">
+		<COL style="width: 5%;">
+                                <COL style="width: 70%;">
+		<COL style="width: 10%;">
+		<COL style="width: 10%;">
+	</COLGROUP>
+	<TR>
+		<TD CLASS="HEAD text-center">
+			{trans("Time")}
+		</TD>
+		<TD CLASS="HEAD text-center">
+			{trans("Type")}
+		</TD>
+                                <TD CLASS="HEAD text-center">
+                                                {trans("Request Number")}
+                                </TD>
+		<TD CLASS="HEAD text-center">
+			{trans("Title")}: {trans("Description")}/{trans("Note")}
+		</TD>
+		<TD CLASS="HEAD text-center">
+			{trans("User")}
+		</TD>
+		<TD CLASS="HEAD text-center">
+			{trans("Customer")}
+		</TD>
+	</TR>
+	{cycle values="white,grey" print=false}
+	{foreach item=event from=$eventlist}
+	<TR class="{cycle}{if $event.wholeday} event-whole-day{/if}{if $event.multiday} event-multi-day{/if}"{if $event.closed==1} style="color: lightgray;"{/if}>
+		<TD class="text-center nobr">
+			{if $event.endtime == 86400}
+				{trans("whole day")}
+			{else}
+				{($date + $event.begintime)|date_format:"%H:%M"}
+				{if $event.begintime != $event.endtime}
+					- {($date + $event.endtime)|date_format:"%H:%M"}
+				{/if}
+				{if $event.multiday}<br>{trans("multi day")}{/if}
+			{/if}
+		</TD>
+		<TD class="text-center">
+			{$_EVENTTYPES[$event.type]}
+		</TD>
+		<TD class="text-center">{if $event.ticketid>0}#{$event.ticketid}{/if}</TD>
+		<TD class="text-left">
+			<B>{$event.title}</B><BR>
+			{$event.description}<BR>
+			{$event.note}
+		</TD>
+		<TD class="text-center nobr">
+			{foreach item=user from=$event.userlist}
+				{$user.name|trunescape:25}<BR>
+			{/foreach}
+		</TD>
+		<TD class="valign-top text-center nobr">
+		{if $event.netnode_id}
+			{trans("Network node:")}<br>
+			{$event.netnode_name}<br>{$event.netnode_location}
+		{else}
+			{$event.customername|truncate:"40":"&hellip;":true}{if !empty($event.customerid)} ({$event.customerid}){/if}<BR>
+			{if !empty($event.address_id)}
+				{$event.location}
+			{elseif !empty($event.nodeid)}
+				{$event.nodelocation}
+			{else}
+				{$event.customerlocation}
+			{/if}
+			<br>{$event.customerphone}
+		{/if}
+		</TD>
+	</TR>
+	{/foreach}
+</TABLE>
+{include file="clearfooter.html"}

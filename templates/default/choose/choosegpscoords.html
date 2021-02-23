@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<!--// $Id$ //-->
+<html><head>
+<meta name="GENERATOR" content="LMS {$layout.lmsv}">
+{include file="language.html"}
+<title>LMS – {if $layout.pagetitle != ""}{$layout.pagetitle}{/if}</title>
+<link href="css/style.css" rel="stylesheet" type="text/css">
+<link href="css/map.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="js/common.js"></script>
+{if $js}<script type="text/javascript">
+<!--
+	{$js}
+//-->
+</script>{/if}
+{if $part == "main"}
+{include file="openlayers.html"}
+<script type="text/javascript">
+<!--
+	function init()
+	{
+		{include file="map.js"}
+
+		if (targetfield1.value.match(/^[0-9]+\.[0-9]+$/) && targetfield2.value.match(/^[0-9]+\.[0-9]+$/))
+			map = createMap(devices, devlinks, nodes, nodelinks, false, targetfield1.value, targetfield2.value);
+		else
+			map = createMap(devices, devlinks, nodes, nodelinks, false);
+
+		function click(e) {
+			var lonlat
+			if (typeof(e.feature) === 'undefined') {
+				lonlat = map.getLonLatFromViewPortPx(e.xy)
+					.transform(map.getProjectionObject(), new OpenLayers.Projection("EPSG:4326"));
+			} else {
+				lonlat = e.xy;
+			}
+			sendvalue(targetfield1, lonlat.lon);
+			sendvalue(targetfield2, lonlat.lat);
+			OpenLayers.Event.stop(e);
+		}
+
+		map.events.register("click", map, click);
+		map.events.register("feature_click", map, click);
+
+		set_lastonline_limit({ConfigHelper::getConfig('phpui.lastonline_limit')});
+		setTimeout("netdevmap_refresh()", lastonline_limit * 1000);
+
+        autoiframe_setsize('autoiframe');
+	}
+//-->
+</script>
+{/if}
+</head>
+{if ! $part}
+<frameset frameborder="0" framespacing="0" ROWS="30,*">
+	<frame scrolling="no" frameborder="0" marginheight="0" marginwidth="0" name="cal" noresize src="?m=choosegpscoords&p=top">
+	<frame scrolling="always" frameborder="0" marginheight="0" marginwidth="0" name="m" noresize src="?m=choosegpscoords&p=main">
+</frameset>
+{/if}
+{if $part == "main"}
+<body onload="init()" class="lms-ui-popup">
+<div id="map" class="smallmap"></div>
+<script>
+
+	document.querySelector('#map').onmousewheel = function(e) {
+		e.preventDefault();
+	}
+
+</script>
+</body>
+{/if}
+{if $part == "top"}
+<body class="lms-ui-popup">
+<table cellpadding="5" width="100%">
+	<tr>
+		<td class="fall dark" align="center">
+			<B>{trans("Select gps coordinates:")}</B>
+		</td>
+	</tr>
+</table>
+{/if}
+</html>

@@ -1,0 +1,76 @@
+dist: xenial
+
+env:
+  global:
+    - COMPOSER_DISABLE_XDEBUG_WARN="1"
+
+matrix:
+  include:
+    - os: linux
+      language: php
+      php: 7.1
+      env:
+        PHPCS_VER="^3"
+        PHPCS_STANDARD="phpcs3.xml"
+        INSTALL_PHP_ZIP_EXTENSION=false
+
+    - os: linux
+      language: php
+      php: 7.2
+      env:
+        PHPCS_VER="^3"
+        PHPCS_STANDARD="phpcs3.xml"
+        INSTALL_PHP_ZIP_EXTENSION=false
+
+    - os: linux
+      language: php
+      php: 7.3
+      env:
+        PHPCS_VER="^3"
+        PHPCS_STANDARD="phpcs3.xml"
+        INSTALL_PHP_ZIP_EXTENSION=false
+
+    - os: linux
+      language: php
+      php: 7.4
+      env:
+        PHPCS_VER="^3"
+        PHPCS_STANDARD="phpcs3.xml"
+        INSTALL_PHP_ZIP_EXTENSION=true
+
+addons:
+  postgresql: 9.4
+
+services:
+  - postgresql
+  - mysql
+
+#before_install:
+#   - if ${INSTALL_PHP_ZIP_EXTENSION}; then sudo apt-get install libzip-dev; pecl install zip; fi
+#   - echo "extension = libzip.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+#  - echo "extension = snmp.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+
+install:
+  - composer install
+
+before_script:
+  - psql -c 'create database lms;' -U postgres
+  - psql -U postgres -f doc/lms.pgsql
+  - mysql -e 'CREATE DATABASE lms;'
+  - mysql lms < doc/lms.mysql
+  - if find . -name "*.php" ! -path "./vendor/*" -print0 | xargs -0 -n 1 -P 8 php -l | grep -v "No syntax errors detected"; then exit 1; fi
+  - if find templates -type f -iname '*.html' | xargs devel/smartylint.php |grep -i "syntax error"; then exit 1; fi
+  - ./vendor/bin/phpcs --standard=$PHPCS_STANDARD .
+  - npm install -g jshint
+  - jshint .
+  - ./vendor/bin/phpunit
+
+script: true
+
+notifications:
+  email:
+#    recipients:
+#      - admin@chilan.com
+#      - r.pietraszewicz@gmail.com
+    on_success: change
+    on_failure: always

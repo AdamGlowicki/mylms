@@ -1,0 +1,196 @@
+{extends file="layout.html"}
+{block name=title}LMS: {$layout.pagetitle|striphtml}{/block}
+{block name=module_content}
+<!-- $Id$ -->
+
+<style>
+
+	table.lmsbox td.message-html-body td {
+		padding: 0;
+	}
+
+</style>
+
+<H1>{$layout.pagetitle}</H1>
+<TABLE class="lmsbox">
+        <COLGROUP>
+                <COL style="width: 1%;">
+                <COL style="width: 1%;">
+                <COL style="width: 98%;">
+	</COLGROUP>
+    <THEAD>
+        <TR>
+		<TD>
+		        {icon name="helpdesk"}
+		</TD>
+		<TD class="bold">
+			{trans("Subject:")}
+		</TD>
+		<TD class="bold">
+			{$message.subject|escape}
+		</TD>
+	</TR>
+    </THEAD>
+    <TBODY>
+	<TR>
+		<TD>
+			{icon name="uptime"}
+		</TD>
+		<TD class="bold">
+			{trans("Date:")}
+		</TD>
+		<TD class="nobr">
+			{$message.createtime|date_format:"%Y/%m/%d %H:%M.%S"}
+		</TD>
+	</TR>
+	<TR>
+		<TD class="nobr">
+		    {if $message.userid}
+				{icon name="user"}
+			{else}
+				{icon name="requestor" class="fa-fw"}
+			{/if}
+		</TD>
+		<TD class="nobr bold">
+			{trans("Requestor:")}
+		</TD>
+		<TD>
+			{if $message.customerid}
+				{if $message.mailfrom}
+					{icon name="mail"}
+				{elseif $message.phonefrom}
+					{icon name="sms"}
+				{/if}
+				<A href="?m=customerinfo&id={$message.customerid}">{$message.customername} ({$message.customerid|escape|string_format:"%04d"})</A>
+			{elseif $message.userid}
+				{icon name="user"}
+				<A href="?m=userinfo&id={$message.userid}">{$message.username|escape}</A>
+			{elseif $message.mailfrom}
+				{icon name="mail"}
+				<A href="mailto:{$message.mailfrom|escape}">{$message.mailfrom|escape}</A>
+			{elseif $message.phonefrom}
+				{icon name="phone"}
+				<A class="phone_number" href="tel:{$message.phonefrom}">{$message.phonefrom}</A>
+			{else}
+				{$message.requestor|escape}
+			{/if}
+		</TD>
+	</TR>
+	{if $message.headers}
+	<TR>
+		<TD>
+			{icon name="message"}
+		</TD>
+		<TD class="bold">
+			{trans("Headers:")}
+		</TD>
+		<TD>
+			<TEXTAREA rows="5" cols="100" readonly>{$message.headers|escape}</TEXTAREA>
+		</TD>
+	</TR>
+	{/if}
+	{if $message.messageid}
+	<TR>
+		<TD>
+			{icon name="message"}
+		</TD>
+		<TD class="nobr bold">
+			Message-Id:
+		</TD>
+		<TD>
+			{$message.messageid|escape}
+		</TD>
+	</TR>
+	{/if}
+	{if $message.replyto}
+	<TR>
+		<TD>
+			{icon name="message"}
+		</TD>
+		<TD class="nobr bold">
+			Reply-To:
+		</TD>
+		<TD>
+			{$message.replyto|escape}
+		</TD>
+	</TR>
+	{/if}
+	{if $message.inreplyto}
+	<TR>
+		<TD>
+			{icon name="message"}
+		</TD>
+		<TD class="nobr">
+			In-Reply-To:
+		</TD>
+		<TD>
+			<A href="?m=rtmessageview&id={$message.inreplyto}">{$message.inreplytoid|escape}</A>
+		</TD>
+	</TR>
+	{/if}
+	<TR>
+		<TD>
+			{icon name="edit"}
+		</TD>
+		<TD class="bold">
+			{trans("Message:")}
+		</TD>
+		<TD{if $message.contenttype == 'text/html'} class="message-html-body"{/if}>
+			{if $message.contenttype == 'text/plain'}
+				<textarea rows="5" cols="100" readonly>{$message.body|trim|escape|message_quote}</textarea>
+			{else}
+				{$message.body|message_quote}
+			{/if}
+		</TD>
+	</TR>
+	{if $message.attachments}
+	<TR>
+		<TD>
+			{icon name="fileupload"}
+		</TD>
+		<TD class="bold">
+			{trans("Attachments:")}
+		</TD>
+		<TD>
+			{foreach from=$message.attachments item=a}
+				{documentview id="{$message.id}-{$a@index}" type=$a.contenttype name=$a.filename
+					url="?m=rtmessageview&tid={$message.ticketid}&mid={$message.id}&file={urlencode($a.filename)}"
+					text="{$a.filename} ({$a.size|string_format:"%.1f"} {$a.unit})"}
+				<BR>
+			{/foreach}
+		</TD>
+	</TR>
+	{/if}
+	{if $message.deleted == 1 && (ConfigHelper::checkPrivilege('helpdesk_advanced_operations'))}
+	<TR>
+		<TD class="nobr">
+
+		</TD>
+		<TD class="nobr bold">
+			{trans("Remover:")}
+		</TD>
+		<TD>
+			<A href="?m=userinfo&id={$message.deluserid}">{$message.delusername|escape}</A>
+		</TD>
+	</TR>
+	<TR>
+		<TD class="nobr">
+
+		</TD>
+		<TD class="nobr bold">
+			{trans("Remove date:")}
+		</TD>
+		<TD>
+			{$message.deltime|date_format:"%Y/%m/%d %H:%M.%S"}
+		</TD>
+	</TR>
+	{/if}
+	<TR>
+		<TD colspan="3" class="lms-ui-box-buttons">
+			{button type="link-button" href="?m=rtmessageadd&id={$message.id}&ticketid={$message.ticketid}" icon="message" label="Reply"}
+			{button type="link-button" href="?m=rtticketview&id={$message.ticketid}" icon="back" label="Back"}
+		</TD>
+	</TR>
+    </TBODY>
+</TABLE>
+{/block}

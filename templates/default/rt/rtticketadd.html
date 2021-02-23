@@ -1,0 +1,23 @@
+{extends file="layout.html"}
+{block name=title}LMS: {$layout.pagetitle|striphtml}{/block}
+{block name=module_content}
+<!-- $Id$ -->
+{$xajax}
+<H1>{$layout.pagetitle}</H1>
+<FORM method="POST" name="ticket" id="ticket-form" action="?m=rtticketadd">
+    {include file="rt/rtticketmodify.html"}
+</FORM>
+
+<script>
+
+	$(function() {
+		$('[name="ticket[subject]"]').focus();
+	});
+
+	initCustomerSelection();
+
+</script>
+
+{if $customerinfo}{include file="customer/customerinfobox.html" info_link=true}{/if}
+
+{/block}

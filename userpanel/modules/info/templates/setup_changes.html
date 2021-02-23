@@ -1,0 +1,71 @@
+{extends file="layout.html"}
+{block name=title}::: LMS :{$layout.pagetitle|striphtml} :::{/block}
+{block name=module_content}
+<!--// $Id$ //-->
+<H1>{$layout.pagetitle}</H1>
+<P>
+<TABLE width="100%" cellpadding="3">
+	<TR>
+		<TD>
+		<FORM NAME="changes" METHOD="POST" ACTION="?m=userpanel&module=info&f=changes">
+			<TABLE class="lmsbox">
+				<COLGROUP>
+					<COL style="width: 30%;">
+					<COL style="width: 15%;">
+					<COL style="width: 25%;">
+					<COL style="width: 25%;">
+					<COL style="width: 5%;">
+				</COLGROUP>
+				<THEAD>
+				<TR>
+					<TD class="bold nobr">{trans("Customer:")}</TD>
+					<TD class="nobr">{trans("Field:")}</TD>
+					<TD class="nobr">{trans("Old value:")}</TD>
+					<TD class="nobr">{trans("New value:")}</TD>
+					<TD>&nbsp;</TD>
+				</TR>
+				</THEAD>
+				<TBODY class="lms-ui-multi-check">
+				{cycle values="light,lucid" print=false}
+				{foreach $userchanges as $change}
+				<TR class="lms-ui-multi-check {cycle advance=false}" onmouseover="addClass(this, 'highlight')" onmouseout="removeClass(this, 'highlight')">
+					<TD class="bold nobr" onClick="return self.location.href='?m=customerinfo&id={$change.customerid}';">
+						{$change.customername|truncate:50:" ..."} ({$change.customerid|string_format:"%04d"})
+					</TD>
+					<TD class="nobr">{t}{$change.fieldname|regex_replace:"/[^a-z]/":""}{/t}</TD>
+					<TD class="nobr">{$change.oldvalue}</TD>
+					<TD class="nobr">{$change.newvalue}</TD>
+					<TD>
+						<INPUT CLASS="lms-ui-multi-check box {cycle}" TYPE="checkbox" NAME="userchanges[]" VALUE="{$change.changeid}">
+					</TD>
+				</TR>
+				{foreachelse}
+				<TR>
+					<TD class="empty-table" colspan="5">
+						<p>{trans("There are any changes to accept.")}</p>
+					</TD>
+				</TR>
+				{/foreach}
+				</TBODY>
+				<TFOOT>
+				<TR>
+					<td class="nobr">
+						<label>
+							{trans("Select All")}
+							<input type="checkbox" class="lms-ui-multi-check-all">
+						</label>
+					</td>
+					<TD class="buttons" COLSPAN="4">
+						<A HREF="javascript:document.changes.action='?m=userpanel&module=info&f=submit_changes_save';document.changes.submit()">{trans("Save")} <IMG SRC="img/save.gif" alt=""></A>
+						/
+						<A HREF="javascript:document.changes.action='?m=userpanel&module=info&f=submit_changes_delete';document.changes.submit()">{trans("Delete")} <IMG SRC="img/delete.gif" alt=""></A>
+					</TD>
+				</TR>
+				</TFOOT>
+			</TABLE>
+		</TD>
+	</FORM>
+	</TR>
+</TABLE>
+</P>
+{/block}

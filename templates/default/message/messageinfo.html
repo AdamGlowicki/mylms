@@ -1,0 +1,283 @@
+{extends file="layout.html"}
+{block name=title}LMS: {$layout.pagetitle|striphtml}{/block}
+{block name=module_content}
+<!--// $Id$ //-->
+<H1>{$layout.pagetitle|escape}</H1>
+<style>
+
+	.lms-ui-button-fileupload {
+		margin-top: 0.5em;
+	}
+
+</style>
+<TABLE class="lmsbox">
+	<COLGROUP>
+		<COL style="width: 1%;">
+		<COL style="width: 1%;">
+		<COL style="width: 98%;">
+	</COLGROUP>
+    <THEAD>
+	<TR>
+		<TD>
+			{if $message.type == $smarty.const.MSG_SMS}
+				{$icon = "sms"}
+			{elseif $message.type == $smarty.const.MSG_WWW}
+				{$icon = "www"}
+			{elseif $message.type == $smarty.const.MSG_USERPANEL || $message.type == $smarty.const.MSG_USERPANEL_URGENT}
+				{$icon = "userpanel"}
+			{else}
+				{$icon = "mail"}
+			{/if}
+			{icon name=$icon class="fa-fw"}
+		</TD>
+		<TD class="bold nobr">
+			{trans("Subject:")}
+		</TD>
+		<TD>
+			{$message.subject|escape}
+		</TD>
+	</TR>
+    </THEAD>
+    <TBODY>
+	<TR>
+		<TD>
+			{icon name="user" class="fa-fw"}
+		</TD>
+		<TD class="bold">
+			{trans("User:")}
+		</TD>
+		<TD>
+			{if $message.userid}
+			<a href="?m=userinfo&id={$message.userid}">{$message.username|escape}</a>
+			{else}LMS{/if}
+		</TD>
+	</TR>
+	<TR>
+		<TD>
+			{icon name="calendar" class="fa-fw"}
+		</TD>
+		<TD class="bold">
+			{trans("Creation date:")}
+		</TD>
+		<TD>
+			{$message.cdate|date_format:"%Y/%m/%d %H:%M"}
+		</TD>
+	</TR>
+{if $message.sender}
+	<TR>
+		<TD>
+			{icon name="mail" class="fa-fw"}
+		</TD>
+		<TD class="bold">
+			{trans("Sender:")}
+		</TD>
+		<TD>
+			{$message.sender|escape:"html"}
+		</TD>
+	</TR>
+{/if}
+	<TR>
+		<TD>
+			{icon name="edit" class="fa-fw"}
+		</TD>
+		<TD class="bold nobr">
+			{trans("Message body:")}
+		</TD>
+		<TD>
+			<TABLE WIDTH="100%" CELLPADDING="5">
+				<TR>
+					<TD CLASS="fall superlight">
+						{if $message.contenttype == 'text/plain'}
+							{nl2br(htmlspecialchars($message.body), false)}
+						{elseif $message.contenttype == 'text/html'}
+							{$message.body}
+						{else}
+							{nl2br($message.body, false)}
+						{/if}
+					</TD>
+				</TR>
+			</TABLE>
+		</TD>
+	</TR>
+	{if $filecontainers}
+		<TR>
+			<TD class="valign-top">
+				{icon name="upload" class="fa-fw"}
+			</TD>
+			<TD class="bold valign-top">
+				{trans("Attachments:")}
+			</TD>
+			<TD>
+				{foreach $filecontainers as $container}
+						{foreach $container.files as $file}
+							{documentview id="{$container.id}-{$file.id}" type=$file.contenttype name=$file.filename
+								url="?m=attachments&attachmentaction=viewfile&type=messageid&id={$container.id}&fileid={$file.id}" external=true
+								text="{$file.filename} <i class=\"lms-ui-icon-view{if preg_match('/pdf/',$file.contenttype)} pdf{elseif preg_match('/csv|excel|spreadsheet/',$file.contenttype)} xls{/if}\"></i>"}
+							<br>
+						{/foreach}
+					{button id="downloadzippedcontainer" onclick="location.href = '?m=attachments&attachmentaction=downloadzippedcontainer&type=messageid&id={$container.id}';" label="Download as zip archive" icon="fileupload"}
+				{/foreach}
+			</TD>
+		</TR>
+	{/if}
+	<TR>
+		<TD COLSPAN="3" class="lms-ui-box-buttons">
+			{button id="delete-message" icon="delete" label="Delete"}
+			{button icon="cancel" label="Cancel" onclick="location.href = '?m=messagelist';"}
+			{button icon="resend" label="Resend" onclick="location.href = '?m=messageadd&messageid={$message.id}';"}
+		</TD>
+	</TR>
+    </TBODY>
+</TABLE>
+<BR>
+<TABLE class="lmsbox lms-ui-background-cycle">
+	<COLGROUP>
+		<COL style="width: 1%;">
+		<COL style="width: 1%;">
+		<COL style="width: 95%;">
+		<COL style="width: 1%;">
+		<COL style="width: 1%;">
+		<COL style="width: 1%;">
+	</COLGROUP>
+    <THEAD>
+	<TR>
+		<TD class="nobr">
+			<A href="?m=messageinfo&id={$message.id}&o=customer{if $listdata.direction == "asc" && $listdata.order == "customer"},desc{/if}">{trans("Customer:")}</A> {if $listdata.order == "customer"}<IMG src="img/{if $listdata.direction == "desc"}asc{else}desc{/if}_order.gif" alt="">{/if}
+		</TD>
+		<TD class="nobr">
+			<A href="?m=messageinfo&id={$message.id}&o=destination{if $listdata.direction == "asc" && $listdata.order == "destination"},desc{/if}">{trans("Destination:")}</A> {if $listdata.order == "destination"}<IMG src="img/{if $listdata.direction == "desc"}asc{else}desc{/if}_order.gif" alt="">{/if}
+		</TD>
+		<TD class="text-right nobr">
+			<A href="?m=messageinfo&id={$message.id}&o=status{if $listdata.direction == "asc" && $listdata.order == "status"},desc{/if}">{trans("Status:")} ({trans("Error message")})</A> {if $listdata.order == "status"}<IMG src="img/{if $listdata.direction == "desc"}asc{else}desc{/if}_order.gif" alt="">{/if}
+		</TD>
+		<TD class="text-right nobr">
+			{trans("Last read on:")}
+		</TD>
+		<TD class="text-right nobr">
+			{trans("Was confirm on:")} ({trans("only userpanel message")})
+		</TD>
+		<TD class="bold nobr">
+			{t a=$listdata.total}Total: $a{/t}&nbsp;
+		</TD>
+	</TR>
+	<TR>
+		<TD colspan="6" class="nobr">
+			<FORM METHOD="POST" NAME="page" action="?m=messageinfo&id={$message.id}">
+			<span class="bold">{trans("Filter:")}</span>
+			<INPUT type="text" name="search" value="{$listdata.search}" {tip text="Enter value of searching data and select category"}>&nbsp;
+			<SELECT size="1" name="cat">
+				<OPTION value=""{if $listdata.cat == ""} SELECTED{/if}>{trans("- select filter category -")}</OPTION>
+				<OPTION value="name"{if $listdata.cat == "name"} SELECTED{/if}>{trans("customer name")}</OPTION>
+				<OPTION value="customerid"{if $listdata.cat == "customerid"} SELECTED{/if}>{trans("customer ID")}</OPTION>
+				<OPTION value="destination"{if $listdata.cat == "destination"} SELECTED{/if}>{trans("destination number/email")}</OPTION>
+			</SELECT>&nbsp;
+			{trans("Status:")}
+			<SELECT size="1" name="status">
+				<OPTION value=""{if !$listdata.status} SELECTED{/if}>{trans("- all statuses -")}</OPTION>
+				<OPTION value="{$smarty.const.MSG_NEW}"{if $listdata.status == $smarty.const.MSG_NEW} SELECTED{/if}>{trans("waiting<!plural>")}</OPTION>
+			{*
+				<OPTION value="{$smarty.const.MSG_DRAFT}"{if $listdata.status == $smarty.const.MSG_DRAFT} SELECTED{/if}>{trans("drafts")}</OPTION>
+			*}
+				<OPTION value="{$smarty.const.MSG_SENT}"{if $listdata.status == $smarty.const.MSG_SENT} SELECTED{/if}>{trans("sent<!plural>")}</OPTION>
+				<OPTION value="{$smarty.const.MSG_ERROR}"{if $listdata.status == $smarty.const.MSG_ERROR} SELECTED{/if}>{trans("errornous<!plural>")}</OPTION>
+				<OPTION value="{$smarty.const.MSG_DELIVERED}"{if $listdata.status == $smarty.const.MSG_DELIVERED} SELECTED{/if}>{trans("delivered<!plural>")}</OPTION>
+			</SELECT>
+			&nbsp;<A href="javascript: document.page.submit();">&raquo;&raquo;&raquo;</A>
+			</FORM>
+		</TD>
+	</TR>
+	{if $listdata.total != 0}
+	<TR>
+		<TD class="lms-ui-pagination" COLSPAN="6">
+			{include file="scroller.html" loop=$itemlist scrollerno=1}
+		</TD>
+	</TR>
+	{/if}
+    </THEAD>
+    <TBODY>
+	{section name=itemlist loop=$itemlist start=$start max=$pagelimit}
+	{assign var=item value=$itemlist[itemlist]}
+	<TR class="{if $item.body}showitem{/if} {if $item.status==$smarty.const.MSG_ERROR} lms-ui-alert{elseif $item.status==$smarty.const.MSG_SENT} blend{elseif $item.status==$smarty.const.MSG_DELIVERED} green{/if}" onmouseover="addClass(this, 'highlight')" onmouseout="removeClass(this, 'highlight')" data-itemid="{$item.id}">
+		<TD class="nobr valign-top">
+			{if $item.customerid}
+				<A href="?m=customerinfo&id={$item.customerid}">{$item.customer|truncate:45:"&hellip;":true} ({$item.customerid|string_format:"%04d"})</A>
+			{else}
+				{trans("none")}
+			{/if}
+		</TD>
+		<TD class="nobr valign-top">
+			{trans("{$item.destination|escape}")}
+			{if $item.body}
+				<div id="{$item.id}" style="display: none;" class="fall superlight">
+					{if $message.contenttype == 'text/plain'}
+						{nl2br(htmlspecialchars($item.body), false)}
+					{elseif $message.contenttype == 'text/html'}
+						{$item.body}
+					{else}
+						{nl2br($item.body, false)}
+					{/if}
+				</div>
+			{/if}
+		</TD>
+		<TD class="text-right valign-top">
+			{if $item.status == $smarty.const.MSG_SENT}
+				{trans("sent")}
+			{elseif $item.status == $smarty.const.MSG_ERROR}
+				{trans("errornous")}{if $item.error} ({$item.error|escape}){/if}
+			{elseif $item.status == $smarty.const.MSG_DELIVERED}
+				{trans("delivered")} ({$item.lastdate|date_format:"%Y/%m/%d %H:%M"})
+			{else}
+				{trans("waiting")}
+			{/if}
+		</TD>
+		<TD class="text-right valign-top">
+			{if $item.lastreaddate}{$item.lastreaddate|date_format:"%Y/%m/%d %H:%M"}{else} - {/if}
+		</TD>
+		<TD class="text-right">
+			{if $item.status == $smarty.const.MSG_DELIVERED && $item.lastdate}{$item.lastdate|date_format:"%Y/%m/%d %H:%M"}{else} - {/if}
+		</TD>
+		<TD class="text-right nobr valign-top">
+			{if $item.body}
+				{button type="link" icon="info" tip="Show message body"}
+			{/if}
+		</TD>
+	</TR>
+	{sectionelse}
+	<TR>
+		<TD COLSPAN="6" class="empty-table">
+			<p>{trans("No such recipients in database.")}</p>
+		</TD>
+	</TR>
+	{/section}
+    </TBODY>
+    <TFOOT>
+	{if $listdata.total != 0}
+	<TR>
+		<TD class="lms-ui-pagination" COLSPAN="6">
+			{include file="scroller.html" loop=$itemlist scrollerno=2}
+		</TD>
+	</TR>
+	{/if}
+	<TR>
+		<TD colspan="6" class="bold text-right">
+			{t a=$listdata.total}Total: $a{/t}
+		</TD>
+	</TR>
+    </TFOOT>
+</TABLE>
+	<script>
+		$(function () {
+			$('.showitem').on('click', function () {
+				var itemid = $(this).attr('data-itemid');
+				$('#'+itemid).toggle();
+			});
+
+			$('#delete-message').click(function() {
+				confirmDialog($t("Are you sure, you want to delete that message?"), this).done(function() {
+					location.href =  '?m=messagedel&id={$message.id}';
+				});
+				return false;
+			});
+		});
+	</script>
+{/block}

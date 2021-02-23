@@ -1,0 +1,53 @@
+{extends file="layout.html"}
+{block name=title}LMS: {$layout.pagetitle|striphtml}{/block}
+{block name=module_content}
+<!-- $Id$ -->
+<H1>{$layout.pagetitle}</H1>
+<FORM method="post" name="promotionadd" action="?m=promotionadd">
+<p style="display: none;">
+<INPUT type="submit" class="hiddenbtn">
+</p>
+<TABLE class="lmsbox">
+	<THEAD>
+	<TR>
+		<TD style="width: 1%;">
+			{icon name="money" class="fa-fw"}
+		</TD>
+		<TD style="width: 1%;" class="bold">
+			{trans("Name:")}
+		</TD>
+		<TD style="width: 98%;">
+			<INPUT type="text" name="promotion[name]" value="{$promotion.name}" size="40" {tip text="Enter promotion name" trigger="name" bold=1}>
+		</TD>
+	</TR>
+	</THEAD>
+	<TBODY>
+	<TR>
+		<TD style="width: 1%;">
+			{icon name="optional-info" class="fa-fw"}
+		</TD>
+		<TD style="width: 1%;" class="bold">
+			{trans("Description:")}
+		</TD>
+		<TD style="width: 98%;">
+			<TEXTAREA name="promotion[description]" cols="50" rows="5" {tip text="Enter additional information (optional)"}>{$promotion.description}</TEXTAREA>
+		</TD>
+	</TR>
+	<TR>
+		<TD class="lms-ui-box-buttons" colspan="3">
+			{button icon="save" label="Submit" onclick="document.promotionadd.submit();"}
+			{button icon="cancel" label="Cancel" href="?m=promotionlist"}
+			<label>
+				<INPUT type="checkbox" name="promotion[reuse]" value="ON" id="reuse" {if $promotion.reuse} checked{/if}>
+				{trans("Display this form again, when this promotion is saved")}
+			</label>
+		</TD>
+	</TR>
+	</TBODY>
+</TABLE></FORM>
+<script>
+
+	document.forms['promotionadd'].elements['promotion[name]'].focus();
+
+</script>
+{/block}

@@ -1,0 +1,21 @@
+{extends file="layout.html"}
+{block name=title}LMS: {$layout.pagetitle|striphtml}{/block}
+{block name=module_content}
+<!--// $Id$ //-->
+<H1>{$layout.pagetitle}</H1>
+<TABLE class="lmsbox">
+    <COLGROUP>
+        <COL style="width: 1%;">
+        <COL style="width: 1%;">
+        <COL style="width: 96%;">
+        <COL style="width: 1%;">
+    </COLGROUP>
+    <THEAD>
+        {include file="event/eventlistheader.html"}
+    </THEAD>
+    <TBODY>
+        {include file="event/eventlistbox.html"}
+    </TBODY>
+</TABLE>
+<H2>{trans("Total events:")} {if empty($eventlist)}0{else}{count($eventlist)}{/if}</H2>
+{/block}

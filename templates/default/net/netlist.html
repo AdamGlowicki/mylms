@@ -1,0 +1,126 @@
+{extends file="layout.html"}
+{block name=title}LMS: {$layout.pagetitle|striphtml}{/block}
+{block name=module_content}
+<!--// $Id$ //-->
+
+<H1>{$layout.pagetitle}</H1>
+
+<FORM method="GET" action="?m=netlist" name="page" form="page-form">
+</FORM>
+
+<table class="lmsbox lms-ui-background-cycle">
+	<COLGROUP>
+		<col style="width: 95%;">
+		<col style="width: 1%;">
+		<col style="width: 1%;">
+		<col style="width: 1%;">
+		<col style="width: 1%;">
+		<col style="width: 1%;">
+	</COLGROUP>
+	<THEAD>
+	<TR {tip text="Click on column name to change sorting order"}>
+		<TD class="nobr">
+			<IMG src="img/network.gif" alt="">
+				<A href="?m={if $search}netsearch{else}netlist{/if}&o=name{if $listdata.direction == "asc" && $listdata.order == "name"},desc{/if}"> <span class="bold">{trans("Name:")}</span></A>{if $listdata.order == "name"}<IMG src="img/{if $listdata.direction == "desc"}asc{else}desc{/if}_order.gif" alt="">{/if}
+				<BR>
+				<IMG src="img/ip.gif" ALT="">
+				<A href="?m={if $search}netsearch{else}netlist{/if}&o=host{if $listdata.direction == "asc" && $listdata.order == "host"},desc{/if}">{trans("host")}</A>{if $listdata.order == "host"}<IMG SRC="img/{if $listdata.direction == "desc"}asc{else}desc{/if}_order.gif" alt="">{/if} /
+				<A href="?m={if $search}netsearch{else}netlist{/if}&o=address{if $listdata.direction == "asc" && $listdata.order == "address"},desc{/if}">{trans("network")}</A>{if $listdata.order == "address"}<IMG SRC="img/{if $listdata.direction == "desc"}asc{else}desc{/if}_order.gif" alt="">{/if} /
+				<A href="?m={if $search}netsearch{else}netlist{/if}&o=mask{if $listdata.direction == "asc" && $listdata.order == "mask"},desc{/if}">{trans("prefix")}</A>{if $listdata.order == "mask"}<IMG SRC="img/{if $listdata.direction == "desc"}asc{else}desc{/if}_order.gif" alt="">{/if}
+				(<A href="?m={if $search}netsearch{else}netlist{/if}&o=interface{if $listdata.direction == "asc" && $listdata.order == "interface"},desc{/if}">{trans("interface")}</A>{if $listdata.order == "interface"}<IMG SRC="img/{if $listdata.direction == "desc"}asc{else}desc{/if}_order.gif" alt="">{/if}) /
+				<A href="?m={if $search}netsearch{else}netlist{/if}&o=vlanid{if $listdata.direction == "asc" && $listdata.order == "vlanid"},desc{/if}">{trans("vlan id")}</A>{if $listdata.order == "vlanid"}<IMG SRC="img/{if $listdata.direction == "desc"}asc{else}desc{/if}_order.gif" alt="">{/if}
+		</TD>
+		<TD class="valign-top right nobr">
+			<IMG src="img/empty.gif" width="1" height="16" alt="">
+				<A href="?m={if $search}netsearch{else}netlist{/if}&o=id{if $listdata.direction == "asc" && $listdata.order == "id"},desc{/if}"> <span class="bold">{trans("ID:")}</span></A>{if $listdata.order == "id"}<IMG src="img/{if $listdata.direction == "desc"}asc{else}desc{/if}_order.gif" alt="">{/if}<BR>
+			<IMG src="img/empty.gif" width="1" height="16" alt="">{trans("Addresses")}
+				(<A href="?m={if $search}netsearch{else}netlist{/if}&o=size{if $listdata.direction == "asc" && $listdata.order == "size"},desc{/if}">{trans("total")}</A>{if $listdata.order == "size"}<IMG SRC="img/{if $listdata.direction == "desc"}asc{else}desc{/if}_order.gif" alt="">{/if} /
+				<A href="?m={if $search}netsearch{else}netlist{/if}&o=assigned{if $listdata.direction == "asc" && $listdata.order == "assigned"},desc{/if}">{trans("busy")}</A>{if $listdata.order == "assigned"}<IMG SRC="img/{if $listdata.direction == "desc"}asc{else}desc{/if}_order.gif" alt="">{/if} /
+				<A href="?m={if $search}netsearch{else}netlist{/if}&o=online{if $listdata.direction == "asc" && $listdata.order == "online"},desc{/if}">{trans("on-line")}</A>{if $listdata.order == "online"}<IMG SRC="img/{if $listdata.direction == "desc"}asc{else}desc{/if}_order.gif" alt="">{/if})
+		</TD>
+		<TD class="nobr">
+			<IMG src="img/dns.gif" alt=""> {trans("DNS servers:")}<BR>
+			<IMG src="img/domain.gif" alt=""> {trans("Domain:")}
+		</TD>
+		<TD class="nobr">
+			<IMG src="img/gateway.gif" alt=""> {trans("Gateway:")}<BR>
+			<IMG src="img/wins.gif" alt=""> {trans("WINS server:")}
+		</TD>
+		<TD class="valign-top nobr">
+			<IMG src="img/dhcp.gif" alt=""> {trans("DHCP range:")}
+		</TD>
+		<TD class="text-right bold nobr">
+			{t a=$listdata.total}Total: $a{/t}
+		</TD>
+	</TR>
+	<TR>
+		<TD class="lms-ui-pagination" COLSPAN="6">
+			{if $pagination->getTotal() != 0}
+				{include file="pagination.html" form="page-form"}
+			{/if}
+		</TD>
+	</TR>
+	</THEAD>
+	<TFOOT>
+	<TR>
+		<TD class="summary" colspan="2">
+			{trans("Total:")} {$listdata.size|default:"0"}/{$listdata.assigned|default:"0"}/{$listdata.online|default:"0"}
+		</TD>
+		<TD colspan="4"></TD>
+	</TR>
+	<TR>
+		<TD class="lms-ui-pagination" COLSPAN="6">
+			{if $pagination->getTotal() != 0}
+				{include file="pagination.html" form="page-form"}
+			{/if}
+		</TD>
+	</TR>
+	</TFOOT>
+	<TBODY>
+	{foreach $netlist as $net}
+	<TR class="highlight{if $net.disabled == 1} blend{/if}" data-target-url="?m=netinfo&id={$net.id}" data-name="{$net.name}">
+		<TD>
+			<A name="{$net.id}" class="nobr">
+			<IMG src="img/network.gif" alt=""> <span class="bold">{$net.name|truncate:40:"&hellip;":true}</span><BR><IMG src="img/ip.gif" alt=""> {if $net.hostname}{$net.hostname}{else}{trans("none")}{/if} / {$net.address} / {$net.prefix} {if $net.interface}({$net.interface}){/if} {if $net.vlanid}/ {$net.vlanid}{/if}
+			</A>
+		</TD>
+		<TD class="valign-top text-right nobr">
+			<img src="img/empty.gif" width="1" height="16" alt="">({$net.id|string_format:"%04d"})<BR><img src="img/empty.gif" width="1" height="16" alt="">{$net.size}/{$net.assigned|string_format:"%01d"}/{$net.online|string_format:"%01d"}
+		</TD>
+		<TD class="nobr">
+			{if $net.dns != ""}<IMG src="img/dns.gif" alt=""> {$net.dns}{if $net.dns2 != ""}, {$net.dns2}{/if}{/if}<BR>
+			{if $net.domain != ""}<IMG src="img/domain.gif" alt=""> {$net.domain}{/if}&nbsp;
+		</TD>
+		<TD class="nobr">
+			{if $net.gateway != ""}<IMG src="img/gateway.gif" alt=""> {$net.gateway}{/if}<BR>
+			{if $net.wins != ""}<IMG src="img/wins.gif" alt=""> {$net.wins}{/if}&nbsp;
+		</TD>
+		<TD class="nobr">
+			{if $net.dhcpstart}<IMG src="img/dhcpstart.gif" alt=""> {$net.dhcpstart}<BR><IMG src="img/dhcpend.gif" alt=""> {$net.dhcpend}{/if}
+		</TD>
+		<TD class="lms-ui-buttons nobr">
+			<A href="?m=netedit&amp;networkset&amp;id={$net.id}">{if $net.disabled}<IMG src="img/noaccess.gif" alt="{trans("Enable")}" title="{trans("Enable")}">{else}<IMG src="img/access.gif" alt="{trans("Disable")}" title="{trans("Disable")}">{/if}</A>
+			<a class="delete-net" href="?m=netdel&id={$net.id}"><IMG src="img/delete.gif" alt="{trans("Remove")}" title="{trans("Remove")}"></A>
+			<A href="?m=netedit&amp;id={$net.id}"><IMG src="img/edit.gif" alt="{trans("Edit")}" title="{trans("Edit")}"></A>
+			<A href="?m=netinfo&amp;id={$net.id}"><IMG src="img/info.gif" alt="{trans("Info")}" title="{trans("Info")}"></A>
+		</TD>
+	</TR>
+	{foreachelse}
+	<TR>
+		<TD colspan="6" class="empty-table">
+			<p>{trans("No IP networks found in database.")} <A HREF="?m=netadd">{trans("Click to add.")}</A></p>
+		</TD>
+	</TR>
+	{/foreach}
+	</TBODY>
+</table>
+<script>
+	$('.delete-net').click(function() {
+		var name = $(this).closest('tr').attr('data-name');
+		confirmDialog($t("Are you sure, you want to remove network '$a' from database?", name), this).done(function() {
+			location.href = $(this).attr('href');
+		});
+		return false;
+	});
+</script>
+{/block}

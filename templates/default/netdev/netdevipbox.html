@@ -1,0 +1,145 @@
+<!--// $Id$ //-->
+
+{css}
+
+{$lastonline_limit=ConfigHelper::getConfig('phpui.lastonline_limit')}
+
+{tab_container id="netdevipbox"}
+
+	{tab_header content_id="deviceips"}
+		{tab_header_cell icon="lms-ui-icon-ipnetwork"}
+			<strong>{if empty($netdevips)}{$netdevips=array()}{/if}{t a=$netdevips|@count}IP addresses ($a):{/t}</strong>
+		{/tab_header_cell}
+		{tab_header_cell}
+			<A HREF="?m=netdevedit&action=addip&id={$netdev.id}">{trans("New address")} &raquo;</A>
+		{/tab_header_cell}
+
+	{/tab_header}
+
+	{tab_contents id="deviceips"}
+
+		{tab_table}
+
+			{if $netdevips}
+			<div class="lms-ui-tab-table-row header">
+				<div class="lms-ui-tab-table-wrapper col-5">
+					<div class="lms-ui-tab-table-wrapper col-2">
+						<div class="lms-ui-tab-table-column name">
+							<strong>{trans("Name:")}</strong>
+						</div>
+						<div class="lms-ui-tab-table-column id">
+							{trans("ID:")}
+						</div>
+					</div>
+					<div class="lms-ui-tab-table-wrapper col-3">
+						<div class="lms-ui-tab-table-wrapper col-2">
+							<div class="lms-ui-tab-table-column address">
+								{trans("Address:")}
+							</div>
+							<div class="lms-ui-tab-table-column mac">
+								{trans("MAC:")}
+							</div>
+						</div>
+						<div class="lms-ui-tab-table-column network">
+							{trans("Network")}
+						</div>
+					</div>
+				</div>
+
+				<div class="lms-ui-tab-table-column buttons">
+					&nbsp;
+				</div>
+			</div>
+			{/if}
+
+			{foreach $netdevips as $netdevip}
+			<div class="lms-ui-tab-table-row{if !$netdevip.access} blend{/if}"
+					data-target-url="?m=netdevinfo&id={if $netdev.id}{$netdev.id}{else}{$netdevedit.id}{/if}&ip={$netdevip.id}">
+				<div class="lms-ui-tab-table-wrapper col-5">
+					<div class="lms-ui-tab-table-wrapper col-2">
+						<div class="lms-ui-tab-table-column name">
+							{if $netdevip.lastonline}
+								{if ($smarty.now-$netdevip.lastonline) > $lastonline_limit}
+									<i class="lms-ui-icon-nodeoff" {tip a=$netdevip.lastonlinedate text="Last online: \$a"}></i>
+								{else}
+									<i class="lms-ui-icon-nodeon" {tip a="on-line" text="Last online: \$a"}></i>
+								{/if}
+							{else}
+								<i class="lms-ui-icon-nodeunk"></i>
+							{/if}
+							<strong>{$netdevip.name}</strong>
+							{if $netdevip.location}<BR>
+								{$netdevip.info|truncate:50:"&hellip;":true}
+							{/if}
+						</div>
+						<div class="lms-ui-tab-table-column id">
+							({$netdevip.id|string_format:"%04d"})
+						</div>
+					</div>
+					<div class="lms-ui-tab-table-wrapper col-3">
+						<div class="lms-ui-tab-table-wrapper col-2">
+							<div class="lms-ui-tab-table-column address">
+								{$netdevip.ip}{if $netdevip.ip_pub!="0.0.0.0"} ({$netdevip.ip_pub}){/if}<BR>
+							</div>
+							<div class="lms-ui-tab-table-column mac">
+								{if empty($netdevip.mac)}
+									{trans("<!mac>- none -")}
+								{else}
+									{$netdevip.mac|replace:",":"<BR>"}
+								{/if}
+							</div>
+						</div>
+						<div class="lms-ui-tab-table-column network">
+							<strong>
+								<a href="?m=netinfo&id={$netdevip.netid}">{$netdevip.netname|truncate:"20":"&hellip;":true}</a>
+							</strong>
+						</div>
+					</div>
+				</div>
+
+				<div class="lms-ui-tab-table-column buttons">
+					{button type="link" href="?m=netdevedit&id={if $netdev.id}{$netdev.id}{else}{$netdevedit.id}{/if}&action=ipset&ip={$netdevip.id}"
+						icon="{if $netdevip.access}connected{else}disconnected{/if}" tip="{if $netdevip.access}Disconnect{else}Connect{/if}"}
+					<input type="hidden" value="{$netdevip.name}">
+					{button type="link" class="delete-address" href="?m=netdevedit&action=ipdel&id={$netdev.id}&ip={$netdevip.id}"
+						icon="delete" tip="Delete"}
+					{button type="link" href="?m=netdevedit&action=editip&id={$netdev.id}&ip={$netdevip.id}"
+						icon="edit" tip="Edit"}
+					{button type="link" href="?m=netdevinfo&id={if $netdev.id}{$netdev.id}{else}{$netdevedit.id}{/if}&ip={$netdevip.id}"
+						icon="info" tip="Info"}
+				</div>
+			</div>
+			{foreachelse}
+
+			<div class="lms-ui-tab-empty-table">
+				{trans("No IP addresses on device.")}
+			</div>
+			{/foreach}
+
+		{/tab_table}
+
+		{if $netdevips}
+		{tab_button_panel}
+			{tab_buttons}
+				{button icon="connected" onclick="location.href='?m=netdevedit&id={if $netdev.id}{$netdev.id}{else}{$netdevedit.id}{/if}&action=ipset&access=1';"
+					label="Connect"}
+				{button icon="disconnected" onclick="location.href='?m=netdevedit&id={if $netdev.id}{$netdev.id}{else}{$netdevedit.id}{/if}&action=ipset';"
+					label="Disconnect"}
+			{/tab_buttons}
+		{/tab_button_panel}
+		{/if}
+
+	{/tab_contents}
+
+{/tab_container}
+
+<script>
+
+	$('.delete-address').click(function() {
+		confirmDialog($t("Are you sure, you want to delete address '$a' from database?", $(this).prev().val()), this).done(function() {
+			location.href = $(this).attr('href');
+		});
+		return false;
+	});
+
+</script>

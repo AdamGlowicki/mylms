@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<!--// $Id$ //-->
+<html><head>
+<meta name="GENERATOR" content="LMS {$layout.lmsv}">
+<meta http-equiv="Content-Language" content="{Localisation::getCurrentHtmlLanguage()}">
+<meta http-equiv="Content-Type" content="text/html; charset={Localisation::getCurrentHtmlCharset()}">
+{* INSERT PAGE TITLE / WSTAW SWÓJ TYTUŁ STRONY *}
+<title></title>
+<STYLE type="text/css">
+	BODY            { font-size: 8pt; font-family: Tahoma, Verdana, Arial, Helvetica; }
+	TD              { font-size: 8pt; font-family: Tahoma, Verdana, Arial, Helvetica; }
+	TABLE           { border-collapse: collapse; border-color: #000000 }
+	FONT.blend      { color: #888888; font-size:  7pt; }
+	A:hover         { text-decoration: underline; color: #345C9E; }
+	H1              { font-size: 14pt; font-family: Tahoma, Verdana, Arial, Helvetica; }
+	TD.fbottom      { border-bottom-width: 1pt; border-bottom-style: solid; }
+</STYLE>
+</head>
+<body marginheight="0" marginwidth="0" bgcolor="#FFFFFF" link="#800000" vlink="#800000" alink="#336600">
+	<DIV ALIGN="CENTER">
+		<CENTER>
+			<TABLE WIDTH="750" CELLPADDING="5">
+				<TR>
+					<TD COLSPAN="3" CLASS="FBOTTOM">
+						<H1>{trans("Customer Information")}</H1>
+					</TD>
+				</TR>
+				{if $customerinfo}
+				<TR>
+					<TD WIDTH="1%" NOWRAP>
+						<B>{trans("ID:")}</B>
+					</TD>
+					<TD WIDTH="54%">
+						{$customerinfo.id|string_format:"%04d"}
+					</TD>
+					<TD ROWSPAN="5" WIDTH="45%" ALIGN="CENTER">
+						<H1>{trans("Balance:")}</H1>
+						<H1>{if $customerinfo.balance < 0}<span style="color: red;"><B>{$customerinfo.balance|money_format}</B>{else}{$customerinfo.balance|money_format}{/if}</H1>
+						{$custombalancedata}
+					</TD>
+				</TR>
+				<TR>
+					<TD WIDTH="1%" NOWRAP>
+						<B>{trans("Name/Surname:")}</B>
+					</TD>
+					<TD WIDTH="54%">
+						{$customerinfo.customername}
+					</TD>
+				</TR>
+				<TR>
+					<TD WIDTH="1%" NOWRAP>
+						<B>{trans("Address:")}</B>
+					</TD>
+					<TD WIDTH="54%">
+						{$customerinfo.address}
+						{if $customerinfo.zip || $customerinfo.city}<BR>{$customerinfo.zip} {$customerinfo.city}{/if}
+					</TD>
+				</TR>
+				<TR>
+					<TD WIDTH="1%" NOWRAP>
+						<B>{trans("Phone:")}</B>
+					</TD>
+					<TD WIDTH="54%">
+						{foreach from=$customerinfo.contacts item=item}
+					            {if $item.phone}{$item.phone}{if $item.name} ({$item.name|truncate:"40":"...":true}){/if}<BR>{/if}
+						{/foreach}
+					</TD>
+				</TR>
+				<TR>
+					<TD WIDTH="1%" NOWRAP>
+						<B>{trans("Monthly payments:")}</B>
+					</TD>
+					<TD WIDTH="54%">
+						{foreach $customerinfo.tariffsvalue as $currency => $value}
+							{if !$value@first}
+								<br>
+							{/if}
+							{moneyf($value.value, $currency)}
+						{foreachelse}
+							{moneyf(0)}
+						{/foreach}
+					</TD>
+				</TR>
+				{else}
+				<TR>
+					<TD COLSPAN="3" WIDTH="100%" ALIGN="CENTER">
+						<span style="color: red;"><H5>{trans("Your IP address was not recognized by system. Please to ensure that you are using computer connected to our network, and you are not using proxy servers. Information about your balance are accessible only from registered computer.")}</H5></span>
+					</TD>
+				</TR>
+				{/if}
+				{if $balance.list}
+				<TR>
+					<TD COLSPAN="3" ALIGN="CENTER">
+						<B>{trans("Balance Sheet:")}</B>
+					</TD>
+				</TR>
+				<TR>
+					<TD COLSPAN="3" ALIGN="CENTER">
+						<TABLE WIDTH="100%" CELLPADDING="3" BORDER="1">
+							<TR BGCOLOR="#000000">
+								<TD>
+									<span style="color: #FFFFFF;"><B>{trans("No.")}</B></span>
+								</TD>
+								<TD>
+									<span style="color: #FFFFFF;"><B>{trans("Date:")}</B></span>
+								</TD>
+								<TD ALIGN="RIGHT">
+									<span style="color: #FFFFFF;"><B>{trans("Value:")}</B></span>
+								</TD>
+								<TD ALIGN="RIGHT">
+									<span style="color: #FFFFFF;"><B>{trans("After:")}</B></span>
+								</TD>
+								<TD>
+									<span style="color: #FFFFFF;"><B>{trans("Comment:")}</B></span>
+								</TD>
+							</TR>
+							{section name=b loop=$balance.list}
+							{$item=$balance.list[b]}
+							<TR>
+								<TD>
+									{$item.id|string_format:"%08d"}
+								</TD>
+								<TD>
+									{$item.date}
+								</TD>
+								<TD ALIGN="RIGHT">
+									{$item.value|money_format}
+								</TD>
+								<TD ALIGN="RIGHT">
+									{$item.after|money_format}
+								</TD>
+								<TD>
+									{$item.comment}
+								</TD>
+							</TR>
+							{sectionelse}
+							<TR>
+								<TD COLSPAN="5" ALIGN="CENTER">
+									<BR>
+									<BR>
+									<B>{trans("No such operations.")}</B><BR>
+									<BR>
+									<BR>
+								</TD>
+							</TR>
+							{/section}
+						</TABLE>
+					</TD>
+				</TR>
+				{/if}
+				<TR>
+					<TD COLSPAN="3" CLASS="FBOTTOM">
+						&nbsp;
+					</TD>
+				</TR>
+				<TR>
+					<TD>
+						<IMG SRC="lms-powered.png" ALT="Powered by LMS!">
+					</TD>
+					<TD COLSPAN="2" WIDTH="99%" ALIGN="RIGHT">
+						<span CLASS="BLEND">{t a=$layout.lmsv}Generated by LMS $a{/t}<BR>
+							&copy; 2001-{$smarty.now|date_format:'%Y'} LMS Developers - <A HREF="http://www.lms.org.pl">http://www.lms.org.pl</A>
+						</span>
+					</TD>
+				</TR>
+			</TABLE>
+		</CENTER>
+	</DIV>
+</BODY>
+</HTML>

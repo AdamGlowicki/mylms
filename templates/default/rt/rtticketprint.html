@@ -1,0 +1,226 @@
+{include file="clearheader.html"}
+<!--// $Id$ //-->
+<TABLE width="100%" align="center">
+	<TR>
+		<TD width="100%" align="RIGHT">
+			LMS {$layout.lmsv} @ {$layout.hostname}<BR>
+			{$smarty.now|date_format:"%A, %x"}<BR>
+			{t a=$layout.logname}Created by: $a{/t}
+		</TD>
+	</TR>
+</TABLE>
+<P>
+<TABLE width="100%" cellpadding="3" border="1" align="CENTER">
+	<COLGROUP>
+		<COL style="width: 1%;">
+		<COL style="width: 99%;">
+	</COLGROUP>
+	<TBODY>
+	<TR>
+		<TD class="HEAD" colspan="2">
+			<H1>{t a=$ticket.ticketid|string_format:"%06d"}Ticket No. $a{/t}</H1>
+		</TD>
+	</TR>
+	<TR>
+		<TD class="bold">
+			{trans("Subject:")}
+		</TD>
+		<TD class="bold nobr">
+			{$ticket.subject|trunescape:50}
+		</TD>
+	</TR>
+	<TR>
+		<TD class="bold">
+			{trans("Requestor:")}
+		</TD>
+		<TD class="nobr">
+			{if $ticket.customerid}
+			{$ticket.customername|escape} ({$ticket.customerid|string_format:"%04d"})
+			{if $ticket.requestor}<BR>{$ticket.requestor}{/if}
+			{if $ticket.requestor_phone}<BR>{$ticket.requestor_phone}{/if}
+			{if $ticket.requestor_mail}<BR>{$ticket.requestor_mail}{/if}
+			{else}
+				{if $ticket.requestor_userid}
+				{$ticket.requestor_username}
+				{else}
+					{$ticket.requestor}
+					{if $ticket.requestor_mail}
+					<br>{$ticket.requestor_mail}
+					{/if}
+					{if $ticket.requestor_phone}
+					<br>{$ticket.requestor_phone}
+					{/if}
+				{/if}
+			{/if}
+		</TD>
+	</TR>
+	<TR>
+		<TD class="bold nobr">
+			{trans("Create time:")}
+		</TD>
+		<TD>
+			{$ticket.createtime|date_format:"%Y/%m/%d %H:%M:%S"}
+		</TD>
+	</TR>
+	{if $ticket.ownername}
+	<TR>
+		<TD class="bold">
+			{trans("Owner:")}
+		</TD>
+		<TD class="nobr">
+			{$ticket.ownername}
+		</TD>
+	</TR>
+	{/if}
+{*
+	<TR>
+		<TD class="bold">
+			{trans("Status:")}
+		</TD>
+		<TD>
+			{$ticket.status}
+		</TD>
+	</TR>
+	<TR>
+		<TD class="bold">
+			{trans("Uptime:")}
+		</TD>
+		<TD class="nobr">
+			{$ticket.uptime}
+		</TD>
+	</TR>
+	<TR>
+		<TD class="bold">
+			{trans("Queue:")}
+		</TD>
+		<TD class="nobr">
+			{$ticket.queuename}
+		</TD>
+	</TR>
+*}
+	<TR>
+		<TD class="bold">
+			{trans("Message:")}
+		</TD>
+		<TD>
+			{$ticket.messages.0.body|escape|replace:"\n":"<BR>"}
+		</TD>
+	</TR>
+	</TBODY>
+</TABLE>
+{if $stats}
+<P>
+<TABLE width="100%" cellpadding="3" align="center">
+	<COLGROUP>
+		<COL style="width: 1%;">
+		<COL style="width: 99%;">
+	</COLGROUP>
+	<TR CLASS="dark">
+		<TD class="bold nobr">
+			{trans("Requests causes (last year):")}
+		</TD>
+		<TD>
+			{trans("company's side")}: <B>{$stats.2.num|default:0}</B>,
+			{trans("customer's side")}: <B>{$stats.1.num|default:0}</B>,
+			{trans("unknown/other<!plural>")}: <B>{$stats.0.num|default:0}</B>,
+			{trans("all")}: <B>{$stats.0.num+$stats.1.num+$stats.2.num}</B>
+		</TD>
+	</TR>
+</TABLE>
+</P>
+{/if}
+{if $messages || $notes}
+<p>
+<table width="100%" cellpadding="3" border="1" align="center">
+	<COLGROUP>
+		<COL style="width: 1%;">
+		<COL style="width: 1%;">
+		<COL style="width: 1%;">
+		<COL style="width: 97%;">
+	</COLGROUP>
+	{counter start=0 skip=1 print=false assign=msgidx}
+	{foreach $ticket.messages as $message}
+	{if ($message.type == $smarty.const.RTMESSAGE_REGULAR && $messages) || ($message.type == $smarty.const.RTMESSAGE_NOTE && $notes)}
+	<THEAD>
+	<TR>
+		<TD class="HEAD valign-top text-right bold nobr">
+			{$message.createtime|date_format:"%Y/%m/%d %H:%M"}
+		</TD>
+		<TD class="HEAD text-right bold">
+			{trans("From:")}{if $message.type == $smarty.const.RTMESSAGE_REGULAR}<BR>{trans("Subject:")}{/if}
+		</TD>
+		<TD class="HEAD nobr">
+			{if $message.type == $smarty.const.RTMESSAGE_REGULAR}
+				{if $message.customerid}
+					{$message.customername}
+				{elseif $message.userid}
+					{$message.username|escape}
+				{elseif $message.mailfrom}
+					{$message.mailfrom|escape}
+				{else}
+					{$ticket.requestor|escape}
+					{if $ticket.requestoremail}
+						&lt;{$ticket.requestoremail|escape}&gt;
+					{/if}
+				{/if}
+			<BR>
+			{$message.subject|escape}
+			{else}
+			{$message.username|escape}
+			{/if}
+		</TD>
+		<TD class="HEAD text-right">
+			{if $message.attachments}
+				{foreach $message.attachments as $attachment}
+					{$attachment.filename} <IMG src="img/attach.gif" alt=""><br>
+				{/foreach}
+			{/if}
+		</TD>
+	</TR>
+	</THEAD>
+	<TBODY>
+	<TR>
+		<TD colspan="4" class="superlight{if $message.type == $smarty.const.RTMESSAGE_NOTE} blend{/if}">
+			{$message.body|escape|replace:"\n":"<BR>"}
+		</TD>
+	</TR>
+	</TBODY>
+	{counter print=false}
+	{elseif $message.type != $smarty.const.RTMESSAGE_NOTE && $history}
+		<tr class="blend">
+			<td class="fbt text-right bold nobr valign-top">
+				{$message.createtime|date_format:"%Y/%m/%d %H:%M"}
+			</td>
+			<td class="fbt text-right bold nobr valign-top">
+				{trans("From:")}
+			</td>
+			<td colspan="2" class="fbt">
+				{$message.username|escape}<BR>
+				{$message.body}
+			</td>
+		</tr>
+	{/if}
+	{/foreach}
+</table>
+</p>
+{/if}
+<P>
+<TABLE width="100%" cellpadding="3" align="CENTER">
+	<TR>
+		<TD width="100%" class="HEAD">
+		{trans("Notes:")}
+		</TD>
+	</TR>
+	<TR>
+		<TD width="100%" class="fall">
+			<P>&nbsp;</p>
+			<P>&nbsp;</p>
+			<P>&nbsp;</p>
+			<P>&nbsp;</p>
+			<P>&nbsp;</p>
+			<P>&nbsp;</p>
+		</TD>
+	</TR>
+</TABLE>
+</p>
+{include file="clearfooter.html"}

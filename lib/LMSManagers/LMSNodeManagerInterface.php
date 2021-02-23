@@ -1,0 +1,104 @@
+<?php
+
+/*
+ *  LMS version 1.11-git
+ *
+ *  Copyright (C); 2001-2021 LMS Developers
+ *
+ *  Please, see the doc/AUTHORS for more information about authors!
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License Version 2 as
+ *  published by the Free Software Foundation.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+ *  USA.
+ *
+ *  $Id$
+ */
+
+/**
+ * LMSNodeManagerInterface
+ *
+ */
+interface LMSNodeManagerInterface
+{
+    public function GetNodeOwner($id);
+
+    public function NodeUpdate($nodedata, $deleteassignments = false);
+
+    public function DeleteNode($id);
+
+    public function GetNodeNameByMAC($mac);
+
+    public function GetNodeIDByIP($ipaddr);
+
+    public function GetNodeIDByMAC($mac);
+
+    public function GetNodeIDByName($name);
+
+    public function GetNodeIDByLogin($login);
+
+    public function GetNodeIDByNetName($name);
+
+    public function GetNodeIPByID($id);
+
+    public function GetNodePubIPByID($id);
+
+    public function GetNodeMACByID($id);
+
+    public function GetNodeName($id);
+
+    public function GetNodeNameByIP($ipaddr);
+
+    public function GetNode($id);
+
+    public function GetNodeList(array $params = array());
+
+    public function NodeSet($id, $access = -1);
+
+    public function NodeSetU($id, $access = false);
+
+    public function NodeSetWarn($id, $warning = false);
+
+    public function NodeSwitchWarn($id);
+
+    public function NodeSetWarnU($id, $warning = false);
+
+    public function IPSetU($netdev, $access = false);
+
+    public function NodeAdd($nodedata);
+
+    public function NodeExists($id);
+
+    public function NodeStats();
+
+    public function GetNodeLinkType($devid, $nodeid);
+
+    public function ValidateNodeLink($node, $link);
+
+    public function SetNodeLinkType($node, $link = null);
+
+    public function updateNodeField($nodeid, $field, $value);
+
+    public function GetUniqueNodeLocations($customerid);
+
+    public function GetNodeLocations($customerid, $address_id = null);
+
+    public function GetNodeCustomerAssignments($nodeid, $assignments);
+
+    public function getNodeRoutedNetworks($nodeid);
+
+    public function getNodeNotRoutedNetworks($nodeid);
+
+    public function addNodeRoutedNetworks(array $params);
+
+    public function deleteNodeRoutedNetworks(array $params);
+}

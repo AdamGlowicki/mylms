@@ -1,0 +1,298 @@
+{extends file="layout.html"}
+{block name=title}LMS: {$layout.pagetitle|striphtml}{/block}
+{block name=module_content}
+<!--// $Id$ //-->
+<H1>{$layout.pagetitle}</H1>
+<style>
+	.customerassignment-header {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: flex-start;
+        width: 100%;
+	}
+
+    .customerassignment-header label{
+        padding-right: 0.5em;
+    }
+
+    .customerassignment-header-row {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+    }
+
+	.customerassignment-header-cell {
+		padding: 0.2em;
+	}
+
+	.customerassignment-header-cell:first-child {
+		width: 6em;
+	}
+
+	.customerassignment-header-row select{
+        width: 100%;
+        flex-grow: 1;
+    }
+
+	.customerassignment-header > div:last-child {
+		padding-left: 5.5em;
+	}
+
+	.customerassignment-header > div:last-child .customerassignment-header-cell:first-child {
+		width: auto;
+	}
+
+	customerassignment-header-cell {
+        display: flex;
+    }
+
+
+</style>
+{$speed_unit_type = ConfigHelper::getConfig('phpui.speed_unit_type', 1000)}
+{$speed_unit_aggregation_threshold = ConfigHelper::getConfig('phpui.speed_unit_aggregation_threshold', 5)}
+
+<FORM method="POST" name="assignment" action="?m={$layout.module}{if $assignment.id}&id={$assignment.id}{if $assignment.liabilityid}&lid={$assignment.liabilityid}{/if}{else}&id={$customerinfo.id}{/if}">
+<INPUT type="submit" class="hiddenbtn">
+<TABLE class="lmsbox">
+	<COLGROUP>
+		<COL style="width: 1%;">
+		<COL style="width: 1%;">
+		<COL style="width: 98%;">
+	</COLGROUP>
+
+    <THEAD>
+		<TR>
+			<TD colspan="3">
+				<div class="customerassignment-header">
+					<div class="customerassignment-header-row">
+						<div class="customerassignment-header-cell">
+							<label><strong>{trans("Type")}:</strong></label>
+						</div>
+						<div class="customerassignment-header-cell">
+							<select name="assignment[servicetype]" id="servicetype">
+								<option value="0">{trans("- all -")}</option>
+								{foreach $_SERVICETYPES as $type => $label}
+									<option value="{$type}"{if $assignment.servicetype == $type} selected{/if}>{$label}</option>
+								{/foreach}
+							</select>
+						</div>
+					</div>
+					{if !empty($tags)}
+					<div class="customerassignment-header-row">
+						<div class="customerassignment-header-cell">
+							<label for="assignment-tags"><strong>{trans("Tags:")}</strong></label>
+						</div>
+						<div class="customerassignment-header-cell">
+							<SELECT id="assignment-tags" name="assignment[tags][]" class="lms-ui-multiselect" {tip text="Select tariff tags"} multiple onchange="javascript:updateTariffs();"{if empty($tags)} style="display: none;"{/if}>
+								{foreach $tags as $tag}
+									<OPTION value="{$tag.id}"{if isset($assignment.tags) && in_array($tag.id, $assignment.tags)} selected{/if}>{$tag.name}</OPTION>
+								{/foreach}
+							</SELECT>
+						</div>
+					</div>
+					{/if}
+					<div class="customerassignment-header-row">
+						<div class="customerassignment-header-cell">
+							<label><strong>{trans("Tariff")}:</strong></label>
+						</div>
+						<div class="customerassignment-header-cell">
+							<input type="hidden" value="" name="assignment[tarifftype]" id="tarifftype">
+							<select id="tariff-select" name="assignment[tariffid]" {tip class="lms-ui-advanced-select" text="Select liability type" trigger="tariffid"}>
+								{block name="customerassignmentsedit-special-tariffs"}
+								<option value=""   data-tarifftype="0" {if !$assignment.tariffid} selected{/if}>- {trans("tariffless liability")} -</option>
+								<option value="-1" data-tarifftype="0" {if $assignment.tariffid == -1} selected{/if}>{trans("- all liabilities suspended -")}</option>
+
+								{if !empty($promotions)}
+									<option value="-2" data-tarifftype="0" {if $assignment.tariffid == -2} selected{/if}>- {trans("per promotion schema")} -</option>
+								{/if}
+
+								{/block}
+
+								{foreach $tariffs as $tariff}
+									<option value="{$tariff.id}" data-tarifftype="{$tariff.tarifftype}" data-tariffaccess="{$tariff.authtype}" data-tarifftags="{$tariff.tags}" {if $tariff.id==$assignment.tariffid} selected{/if} data-valid="{$tariff.valid}"{if !$tariff.valid} class="blend"{if !$assignment.alltariffs} style="display: none;"{/if}{/if}>
+									{$tariff.name}
+									{$bracket_open = false}
+									{if ConfigHelper::checkConfig('privileges.superuser') || !ConfigHelper::checkConfig('privileges.hide_finances')}({moneyf($tariff.value, $tariff.currency)}{$bracket_open = true}{/if}{if $tariff.upceil || $tariff.downceil}{if $bracket_open}, {else}({$bracket_open = true}{/if}{convert_to_units($tariff.downceil * $speed_unit_type, $speed_unit_aggregation_threshold, $speed_unit_type)}/{convert_to_units($tariff.upceil * $speed_unit_type, $speed_unit_aggregation_threshold, $speed_unit_type)}{/if}{if $bracket_open}){/if}
+									</option>
+								{/foreach}
+							</select>
+						</div>
+					</div>
+					<div class="customerassignment-header-row">
+						<div class="customerassignment-header-cell">
+							<label>
+								<input type="checkbox" id="alltariffs" name="assignment[alltariffs]" {tip text="Check if all tariffs should be displayed" trigger="alltariffs"}{if $assignment.alltariffs} checked{/if}>
+								{trans("show all tariffs")}
+							</label>
+						</div>
+					</div>
+				</div>
+			</td>
+		</TR>
+    </THEAD>
+
+    <TBODY>
+		<tr>
+			<td colspan="3" class="container">
+                {include file="customer/customerassignmenthelper.html" variable_prefix="assignment" variables=$assignment}
+            </TD>
+		</TR>
+
+		<TR>
+			<TD class="lms-ui-box-buttons" colspan="3">
+				{button id="submit-button" icon="save" label="Submit"}
+				{button id="cancel-button" icon="cancel" label="Cancel" onclick="location.href = '?m=customerinfo&id={$customerinfo.id}';"}
+			</TD>
+		</TR>
+    </TBODY>
+</TABLE>
+</FORM>
+<BR>
+
+{include file="customer/customerassignments.html"}
+
+<SCRIPT>
+
+	var tariffTypes = [];
+	{foreach $tariffs as $tariff}
+	tariffTypes[{$tariff.id}] = {$tariff.tarifftype};
+	{/foreach}
+
+	var selected = {};
+	{if !empty($assignment.snodes)}
+	selected["snodes"] = {json_encode($assignment.snodes)};
+	{/if}
+	{if !empty($assignment.sphones)}
+	selected["sphones"] = {json_encode($assignment.sphones)};
+	{/if}
+	selected["location"] = "{if isset($assignment.location)}{$assignment.location}{/if}";
+	selected["recipient_address_id"] = "{if isset($assignment.recipient_address_id)}{$assignment.recipient_address_id}{else}0{/if}";
+
+	var assignment_settings = {
+		customerid: {$customerinfo.id},
+		selected: selected,
+		internetTariffType: {$smarty.const.SERVICE_INTERNET},
+		phoneTariffType: {$smarty.const.SERVICE_PHONE},
+		tariffTypes: tariffTypes,
+		variablePrefix: 'assignment',
+        hideFinances: {if !ConfigHelper::checkConfig('privileges.superuser') && ConfigHelper::checkConfig('privileges.hide_finances')}true{else}false{/if}
+	}
+
+	var customer_assignment_helper = new CustomerAssignmentHelper(assignment_settings);
+	$(function() {
+		$('#submit-button').click(function(e) {
+			{if ConfigHelper::checkConfig('phpui.node_assignment_warning')}
+			var tariffid = parseInt($('form[name="assignment"] select[name="assignment[tariffid]"]').val());
+
+			if (isNaN(tariffid)) {
+				document.assignment.submit();
+				return;
+			}
+
+			switch (tariffid) {
+				case -1:
+					document.assignment.submit();
+					return;
+				case -2:
+                    if (!customer_assignment_helper.validate(e))
+                    	return;
+					break;
+				default:
+					if (tariffTypes[tariffid] == {$smarty.const.SERVICE_INTERNET} && !$('#nodelist :checked:not([name="allbox"])').length) {
+						confirmDialog($t("No nodes has been selected for assignment, by at least one is recommended! Are you sure you want to continue despite of this?"), this)
+								.done(function() {
+									document.assignment.submit();
+								})
+								.fail(function() {
+									e.stopImmediatePropagation();
+								});
+						return;
+					}
+					break;
+			}
+			{/if}
+
+            document.assignment.submit();
+		});
+
+		$('#alltariffs').click(function() {
+			updateTariffs();
+
+			var checked = this.checked;
+
+			// +++ PROMOTION CODE
+			var promotion_select = $('#promotion-select');
+			$('optgroup', promotion_select).each(function() {
+				if ($(this).attr('data-valid') == '0') {
+					$(this).css('display', checked ? '' : 'none');
+				}
+			});
+			if (!checked && $('option[data-valid="0"]', promotion_select).filter(':selected').val() == promotion_select.val()) {
+				promotion_select.val($('option[data-valid="1"]:nth(0)', promotion_select).val());
+				promotion_select.trigger('change');
+			}
+			// +++ PROMOTION CODE
+		});
+
+		$('#servicetype').change(function() {
+			updateTariffs();
+		});
+
+		updateCheckAllNodes();
+
+		updateTariffs();
+	});
+
+	function updateTariffs() {
+		var allTariffChecked = $('#alltariffs').is(':checked');
+		var tariff_select = $('#tariff-select');
+		var serviceType = parseInt($('#servicetype').val());
+
+		var tags = [];
+		$('#assignment-tags option:selected').each(function() {
+			tags.push(parseInt($(this).val()));
+		});
+
+		$('option', tariff_select).each(function() {
+			var option = $(this);
+
+			if (option.val() <= 0) {
+				return;
+			}
+
+			var tariffType = parseInt(option.attr('data-tarifftype'));
+			var tariffValid = parseInt(option.attr('data-valid'));
+			var visible = false;
+
+			if (tags.length) {
+				var tarifftags = option.attr('data-tarifftags');
+				if (typeof(tarifftags) !== 'undefined' && tarifftags.length) {
+					tarifftags = JSON.parse('[' + tarifftags + ']');
+
+					$.each(tarifftags, function (key, value) {
+						if (tags.indexOf(value) > -1) {
+							visible = visible || tariffValid !== 0 || allTariffChecked;
+						}
+					});
+				}
+			} else {
+				visible = tariffValid !== 0 || allTariffChecked;
+			}
+
+			if (serviceType) {
+				visible = visible && (!tariffType || serviceType === tariffType);
+			}
+
+			option.toggle(visible);
+		});
+
+		if ($('option:selected', tariff_select).css('display') == 'none') {
+			tariff_select.val($('option:nth-child(0)').val());
+		}
+
+		updateAdvancedSelects(tariff_select);
+	}
+
+</SCRIPT>
+{/block}

@@ -1,0 +1,106 @@
+<!--// $Id$ //-->
+
+{css}
+{js}
+
+<FORM method="post" name="customergroupassignment" id="customergroupassignment" action="?m=customergroup&action=add&id={$customerinfo.id}">
+	<input type="hidden" class="customerid" value="{$customerinfo.id}">
+</FORM>
+
+{tab_container id="customergroups" label="Customer Groups"}
+
+	{tab_header content_id="groupspanel"}
+		{tab_header_cell icon="lms-ui-icon-cg"}
+			<strong>{trans("Customer Groups:")}</strong>
+		{/tab_header_cell}
+	{/tab_header}
+
+	{tab_contents id="groupspanel"}
+
+		{tab_table}
+			{if $customergroups}
+			<div class="lms-ui-tab-table-row header">
+				<div class="lms-ui-tab-table-wrapper col-3">
+					<div class="lms-ui-tab-table-wrapper col-2">
+						<div class="lms-ui-tab-table-column name">
+							<strong>{trans("Name:")}</strong>
+						</div>
+						<div class="lms-ui-tab-table-column description">
+							{trans("Description:")}
+						</div>
+					</div>
+
+					<div class="lms-ui-tab-table-column id">
+						{trans("ID:")}
+					</div>
+				</div>
+
+				<div class="lms-ui-tab-table-column buttons">
+					&nbsp;
+				</div>
+			</div>
+			{/if}
+
+			{foreach $customergroups as $customergroup}
+			<div class="lms-ui-tab-table-row">
+				<div class="lms-ui-tab-table-wrapper col-3">
+					<div class="lms-ui-tab-table-wrapper col-2">
+						<div class="lms-ui-tab-table-column name">
+							<strong>
+								<A href="?m=customergroupinfo&id={$customergroup.id}">
+									<i class="lms-ui-icon-cg"></i>
+									{$customergroup.name}
+								</A>
+							</strong>
+						</div>
+						<div class="lms-ui-tab-table-column description">
+							{$customergroup.description|escape|default:"-"}
+						</div>
+					</div>
+
+					<div class="lms-ui-tab-table-column id">
+						({$customergroup.id|string_format:"%04d"})
+					</div>
+				</div>
+
+				<div class="lms-ui-tab-table-column buttons">
+					{textformat assign="onclick" wrap=5000}
+						confirmDialog($t('Are you sure, you want to remove customer from group?'), this).done(function() {
+							location.href = '?m=customergroup&customergroupid={$customergroup.id}&action=delete&id={$customerinfo.id}';
+						});
+					{/textformat}
+					{button type="link" icon="delete" onclick=$onclick tip="Remove customer from group"}
+					<input type="checkbox" name="markedcustomergroupid[{$customergroup.id}]"
+							value="{$customergroup.id}" class="lms-ui-multi-check" form="customergroupassignment">
+				</div>
+			</div>
+			{foreachelse}
+			<div class="lms-ui-tab-empty-table">
+				{trans("That customer is not a member of any group.")}
+			</div>
+			{/foreach}
+		{/tab_table}
+
+		{tab_button_panel}
+			{tab_buttons}
+				{button icon="delete" label="Delete" id="delete-groups"}
+{if !empty($othercustomergroups)}
+				{button icon="add" label="Add" id="add-groups" tip="Add customer to groups"}
+				<SELECT NAME="customergroupid[]" {tip text="Select group to attribute to customer" class="lms-ui-multiselect"}
+						form="customergroupassignment" multiple>
+					{foreach $othercustomergroups as $customergroup}
+					<OPTION VALUE="{$customergroup.id}">{$customergroup.name} ({$customergroup.id|string_format:"%04d"})</OPTION>
+					{/foreach}
+				</SELECT>
+{/if}
+			{/tab_buttons}
+			{tab_buttons}
+				<label>
+					{trans("Check All")}
+					<input type="checkbox" class="lms-ui-multi-check-all">
+				</label>
+			{/tab_buttons}
+		{/tab_button_panel}
+
+	{/tab_contents}
+{/tab_container}

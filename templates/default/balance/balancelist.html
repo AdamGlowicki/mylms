@@ -1,0 +1,336 @@
+{extends file="layout.html"}
+{block name=title}LMS: {$layout.pagetitle|striphtml}{/block}
+{block name=module_content}
+<!--// $Id$ //-->
+<H1>{$layout.pagetitle}</H1>
+<SCRIPT>
+
+	$(function() {
+		$('#deletemarked').click(function() {
+			if ($('tr[data-published="1"] :checked').length) {
+				{if ConfigHelper::checkPrivilege('published_document_modification')}
+					confirmDialog($t("Some documents have been published already! Are you sure you want to delete them despite this?"), this).done(function() {
+						document.page.action="?m=balancedel";
+						document.page.target="";
+						document.page.submit();
+					});
+					return false;
+				{else}
+					alertDialog($t("Some documents have been published already!"), this);
+					return;
+				{/if}
+			}
+
+			confirmDialog($t("Are you sure, you want to delete selected operation(s) and/or document item(s)?"), this).done(function() {
+				document.page.action="?m=balancedel";
+				document.page.target="";
+				document.page.submit();
+			});
+			return false;
+		});
+
+		$('#search,#cat').change(function() {
+			$('#sourcefileid').val('');
+		});
+
+		$('#print-invoices').click(function() {
+			var print_invoices = $(this).is('#print-invoices');
+			if ((print_invoices && !$('tr[data-doctype="{$smarty.const.DOC_INVOICE}"] :checked').length
+					&& !$('tr[data-doctype="{$smarty.const.DOC_CNOTE}"] :checked').length)
+					|| (!print_invoices && !$('tr[data-doctype="{$smarty.const.DOC_DNOTE}"] :checked').length)) {
+				alertDialog($t('No document of given type has been selected!'), this);
+				return;
+			}
+
+			var add = "";
+			var which = 0;
+			$('form[name="page"] [name^="which"]:checked').each(function() {
+				which += parseInt($(this).val());
+			});
+			add += "&which=" + which;
+
+			document.page.action="?m=invoice&print=cached&cash=1" + add;
+			document.page.target="_blank";
+			document.page.submit();
+		});
+
+		$('#print-receipts').click(function() {
+			if (!$('tr[data-doctype="{$smarty.const.DOC_RECEIPT}"] :checked').length) {
+				alertDialog($t('No document of given type has been selected!'), this);
+				return;
+			}
+
+			var add = "";
+			var which = 0;
+			$('form[name="page"] [name^="which"]:checked').each(function() {
+				which += parseInt($(this).val());
+			});
+			add += "&which=" + which;
+
+			document.page.action = "?m=receipt&print=cached&cash=1" + add;
+			document.page.target = "_blank";
+			document.page.submit();
+		});
+	});
+
+	function filter()
+	{
+		document.page.action="?m=balancelist";
+		document.page.target="";
+		document.page.submit();
+	}
+
+	{if ConfigHelper::checkConfig('phpui.short_pagescroller')}
+	function pagechange1()
+	{
+		document.page.action="?m=balancelist&page=" + document.forms['page'].elements['page1'].value;
+		document.page.target="";
+		document.page.submit();
+	}
+	function pagechange2()
+	{
+		document.page.action="?m=balancelist&page=" + document.forms['page'].elements['page2'].value;
+		document.page.target="";
+		document.page.submit();
+	}
+	{/if}
+</SCRIPT>
+<FORM METHOD="POST" NAME="page" id="balancelist">
+<INPUT type="submit" class="hiddenbtn">
+<TABLE class="lmsbox lms-ui-background-cycle">
+    <COLGROUP>
+        <COL style="width: 1%;">
+        <COL style="width: 1%;">
+        <COL style="width: 1%;">
+        <COL style="width: 1%;">
+        <COL style="width: 1%;">
+        <COL style="width: 1%;">
+        <COL style="width: 1%;">
+        <COL style="width: 1%;">
+        <COL style="width: 91%;">
+        <COL style="width: 1%;">
+    </COLGROUP>
+    <THEAD>
+	<TR>
+		<TH scope="col">
+			{trans("Date:")}
+		</TH>
+		<TH scope="col">
+			{trans("User:")}
+		</TH>
+		<TH scope="col" class="text-right">
+			{trans("Liability:")}
+		</TH>
+		<TH scope="col" class="text-right">
+			{trans("Income:")}
+		</TH>
+		<TH scope="col" class="text-right">
+			{trans("Expense:")}
+		</TH>
+		<TH scope="col" class="text-center">&raquo;</TH>
+		<TH scope="col" class="text-right">
+			{trans("After:")}
+		</TH>
+                <TH scope="col">
+			{trans("Customer:")}
+		</TH>
+		<TH scope="col">
+			{trans("Description:")}
+		</TH>
+		<TH scope="col">&nbsp;</TH>
+	</TR>
+	<TR>
+		<TD colspan="10">
+			<strong>{trans("Filter:")}</strong>
+			{if $listdata.cat == 'cashimport' && !is_array($listdata.search) && isset($sourcefilename)}
+				<INPUT type="hidden" name="sourcefileid" id="sourcefileid" value="{$listdata.search}">
+			{/if}
+			<INPUT type="text" name="search" id="search" value="{if $listdata.cat == 'cashimport' && isset($sourcefilename)}{$sourcefilename}{else}{$listdata.search}{/if}"
+				   size="15" {tip text="Enter value of searching data and select category"}>
+			<SELECT size="1" name="cat" id="cat" style="width: 150px">
+				<OPTION value=""{if $listdata.cat == ""} SELECTED{/if}>{trans("- select category -")}</OPTION>
+				<OPTION value="comment"{if $listdata.cat == "comment"} SELECTED{/if}>{trans("comment")}</OPTION>
+				<OPTION value="cdate"{if $listdata.cat == "cdate"} SELECTED{/if}>{trans("date (YYYY/MM/DD)")}</OPTION>
+				<OPTION value="month"{if $listdata.cat == "month"} SELECTED{/if}>{trans("month (YYYY/MM)")}</OPTION>
+				<OPTION value="number"{if $listdata.cat == "number"} SELECTED{/if}>{trans("document number")}</OPTION>
+				<OPTION value="value"{if $listdata.cat == "value"} SELECTED{/if}>{trans("value")}</OPTION>
+				<OPTION value="name"{if $listdata.cat == "name"} SELECTED{/if}>{trans("customer name")}</OPTION>
+				<OPTION value="customerid"{if $listdata.cat == "customerid"} SELECTED{/if}>{trans("customer ID")}</OPTION>
+				<OPTION value="ten"{if $listdata.cat == "ten"} SELECTED{/if}>{trans("TEN")}</OPTION>
+				<OPTION value="address"{if $listdata.cat == "address"} SELECTED{/if}>{trans("address")}</OPTION>
+				<OPTION value="documented"{if $listdata.cat == "documented"} SELECTED{/if}>{trans("with document")}</OPTION>
+				<OPTION value="notdocumented"{if $listdata.cat == "notdocumented"} SELECTED{/if}>{trans("without document")}</OPTION>
+				<OPTION value="cashimport"{if $listdata.cat == "cashimport"} selected{/if}>{trans("cash import file")}</OPTION>
+			</SELECT>
+			{trans("Group:")}
+			<SELECT size="1" name="group">
+				<OPTION value="0"{if !$listdata.group} SELECTED{/if}>{trans("- all groups -")}</OPTION>
+				{section name="grouplist" loop=$grouplist}
+					<OPTION value="{$grouplist[grouplist].id}"{if $listdata.group == $grouplist[grouplist].id} SELECTED{/if}>{$grouplist[grouplist].name|truncate:40:"&hellip;":true}</OPTION>
+				{/section}
+			</SELECT>
+			<INPUT type="checkbox" name="groupexclude" id="groupexclude"{if $listdata.groupexclude} CHECKED{/if}><label
+					for="groupexclude">{trans("exclude group")}</label>&nbsp;
+			<span class="nobr">
+				{date_period_preset from="#balancelist [name=\"from\"]" to="#balancelist [name=\"to\"]" time=true}
+				{trans("From:")} <INPUT TYPE="text" NAME="from" SIZE="14" maxlength="16"
+										value="{if $listdata.from > 0}{$listdata.from|date_format:"%Y/%m/%d %H:%M"}{/if}"
+										placeholder="{trans("yyyy/mm/dd hh:mm")}" {tip class="lms-ui-datetime" text="Enter date in YYYY/MM/DD format (empty field means no limit) or click to choose it from calendar"}>
+				{trans("To:")} <INPUT TYPE="text" NAME="to" SIZE="14" maxlength="16"
+									  value="{if $listdata.to > 0}{$listdata.to|date_format:"%Y/%m/%d %H:%M"}{/if}"
+									  placeholder="{trans("yyyy/mm/dd hh:mm")}" {tip class="lms-ui-datetime" text="Enter date in YYYY/MM/DD format (empty field means no limit) or click to choose it from calendar"}>
+			</span>
+			<A href="javascript:filter();">&raquo;&raquo;&raquo;</A><BR>
+		</TD>
+	</TR>
+	{if $pagination->getTotal() != 0}
+	<TR>
+		<TD class="lms-ui-pagination" COLSPAN="10">
+			{include file="pagination.html"}
+		</TD>
+	</TR>
+	{/if}
+    </THEAD>
+    <TBODY class="lms-ui-multi-check">
+	{foreach $balancelist as $balance}
+	<TR class="highlight"{if $balance.docid} data-published="{$balance.published}"
+			data-doctype="{$balance.doctype}"{/if}>
+		<TD class="nobr">
+			{$balance.time|date_format:"%Y/%m/%d %H:%M"}
+		</TD>
+		<TD class="nobr">
+			{if $balance.userid}{$balance.user|truncate:16:"&hellip;":true}{else}-{/if}
+		</TD>
+		<TD class="text-right nobr">
+			{if $balance.covenant}{moneyf($balance.value*-1, $balance.currency)}{else}-{/if}
+		</TD>
+		<TD class="text-right nobr">
+                        {if !$balance.covenant && $balance.value > 0}{moneyf($balance.value, $balance.currency)}{else}-{/if}
+		</TD>
+		<TD class="text-right nobr">
+			{if !$balance.covenant && $balance.value < 0}{moneyf($balance.value*-1, $balance.currency)}{else}-{/if}
+		</TD>
+		<TD class="text-center">
+			&raquo;
+		</TD>
+		<TD class="text-right nobr">
+                        {if $balance.covenant}-{else}{moneyf($balance.after)}{/if}
+		</TD>
+		<TD class="text-right nobr">
+			{if $balance.customerid}<A HREF="?m=customerinfo&id={$balance.customerid}">{$balance.customername|trunescape:20}</A>{else} - {/if}
+		</TD>
+		<TD>
+			{$balance.comment}
+		</TD>
+		<TD class="text-right nobr">
+			{if $balance.docid}
+				{if $balance.doctype==$smarty.const.DOC_INVOICE}
+					{if !$balance.published || ConfigHelper::checkPrivilege('published_document_modification')}
+						{button type="link" icon="view" class="print-invoice lms-ui-tooltip-invoiceinfo"
+							href="?m=invoice&id={$balance.docid}&dontpublish=1"
+							resourceid="{$balance.docid}" external=true icon_tip="View"}
+					{/if}
+					{button type="link" icon="print" class="print-invoice lms-ui-tooltip-invoiceinfo"
+						href="?m=invoice&id={$balance.docid}"
+						resourceid="{$balance.docid}" external=true icon_tip="Invoice"}
+				{elseif $balance.doctype==$smarty.const.DOC_CNOTE}
+					{if !$balance.published || ConfigHelper::checkPrivilege('published_document_modification')}
+						{button type="link" icon="view" class="print-invoice lms-ui-tooltip-docnumber"
+							href="?m=invoice&id={$balance.docid}&dontpublish=1"
+							resourceid="{$balance.docid}" external=true icon_tip="View"}
+					{/if}
+					{button type="link" icon="print" class="print-invoice lms-ui-tooltip-docnumber"
+						href="?m=invoice&id={$balance.docid}"
+						resourceid="{$balance.docid}" external=true icon_tip="Credit note"}
+				{elseif $balance.doctype==$smarty.const.DOC_RECEIPT}
+					{button type="link" icon="print" class="lms-ui-tooltip-docnumber"
+						href="?m=receipt&id={$balance.docid}"
+						resourceid="{$balance.docid}" external=true icon_tip="Cash receipt"}
+				{elseif $balance.doctype==$smarty.const.DOC_DNOTE}
+					{if !$balance.published || ConfigHelper::checkPrivilege('published_document_modification')}
+						{button type="link" icon="view" class="lms-ui-tooltip-docnumber"
+							href="?m=note&id={$balance.docid}&dontpublish=1"
+							resourceid="{$balance.docid}" external=true icon_tip="View"}
+					{/if}
+					{button type="link" icon="print" class="lms-ui-tooltip-docnumber"
+						href="?m=note&id={$balance.docid}"
+						resourceid="{$balance.docid}" external=true icon_tip="Debit note"}
+				{/if}
+			{/if}
+			<INPUT TYPE="checkbox" class="lms-ui-multi-check" NAME="marks[{$balance.id}]" VALUE="{$balance.id}">
+		</TD>
+	</TR>
+	{foreachelse}
+	<TR>
+		<TD COLSPAN="10" class="empty-table">
+			<p>{trans("No such transactions found in database.")}</p>
+		</TD>
+	</TR>
+	{/foreach}
+    </TBODY>
+    <TFOOT>
+	<TR>
+		<TD COLSPAN="8" class="nobr">
+			{button id="deletemarked" icon="delete" label="Delete"}
+			{trans("Print")}
+			{button icon="print" label="invoices" id="print-invoices"}
+			{button icon="cash" label="cash receipts" id="print-receipts"}
+			<label>
+				<INPUT type="checkbox" name="which[{$smarty.const.DOC_ENTITY_ORIGINAL}]"
+						value="{$smarty.const.DOC_ENTITY_ORIGINAL}"
+						{if preg_match('/original/i', ConfigHelper::getConfig('invoices.default_printpage'))} checked{/if}>
+				{$_DOCENTITIES[$smarty.const.DOC_ENTITY_ORIGINAL]}
+			</label>
+			<label>
+				<INPUT type="checkbox" name="which[{$smarty.const.DOC_ENTITY_COPY}]"
+					   value="{$smarty.const.DOC_ENTITY_COPY}"
+						{if preg_match('/copy/i', ConfigHelper::getConfig('invoices.default_printpage'))} checked{/if}>
+				{$_DOCENTITIES[$smarty.const.DOC_ENTITY_COPY]}
+			</label>
+			<label>
+				<INPUT type="checkbox" name="which[{$smarty.const.DOC_ENTITY_DUPLICATE}]"
+					   value="{$smarty.const.DOC_ENTITY_DUPLICATE}"
+						{if preg_match('/duplicate/i', ConfigHelper::getConfig('invoices.default_printpage'))} checked{/if}>
+				{$_DOCENTITIES[$smarty.const.DOC_ENTITY_DUPLICATE]}
+			</label>
+		</TD>
+		<TD colspan="2" class="text-right nobr">
+			<label>
+				{trans("Check All")}
+				<INPUT TYPE="checkbox" class="lms-ui-multi-check-all" NAME="allbox" VALUE="1">
+			</label>
+		</TD>
+	</TR>
+	{if $pagination->getTotal() != 0}
+	<TR>
+		<TD class="lms-ui-pagination" COLSPAN="10">
+			{include file="pagination.html"}
+		</TD>
+	</TR>
+	{/if}
+	<TR>
+		<TD colspan="2" class="text-right bold">
+			{trans("Total:")}
+		</TD>
+		<TD class="text-right bold nobr">
+			{$listdata.liability|money_format}
+		</TD>
+		<TD class="text-right bold nobr">
+			{$listdata.income|money_format}
+		</TD>
+		<TD class="text-right bold nobr">
+			{$listdata.expense|money_format}
+		</TD>
+		<TD colspan="2">&nbsp;</TD>
+		<TD class="text-right bold nobr">
+			{trans("Balance:")}
+		</TD>
+		<TD class="bold nobr">
+			{$listdata.totalval|money_format}
+		</TD>
+		<TD>&nbsp;</TD>
+	</TR>
+    </TFOOT>
+</TABLE>
+</FORM>
+{/block}

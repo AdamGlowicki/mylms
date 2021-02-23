@@ -1,0 +1,81 @@
+{include file="clearheader.html"}
+<!--// $Id$ //-->
+<TABLE WIDTH="100%" CELLPADDING="3" ALIGN="CENTER">
+	<TR>
+		<TD WIDTH="535" VALIGN="TOP">
+			<H1>{$layout.pagetitle}</H1>
+		</TD>
+		<TD WIDTH="180" ALIGN="RIGHT" NOWRAP>
+			LMS {$layout.lmsv} @ {$layout.hostname}<BR>
+			{$smarty.now|date_format:"%A, %x"}<BR>
+			{t a=$layout.logname}Prepared by: $a{/t}
+		</TD>
+	</TR>
+</TABLE>
+<BR>
+<TABLE WIDTH="100%" CELLPADDING="3" BORDER="1" ALIGN="CENTER">
+	<TR>
+		<TD WIDTH="15" ALIGN="CENTER" CLASS="head">
+			{trans("No.")}
+		</TD>
+		<TD WIDTH="20" ALIGN="CENTER" CLASS="head">
+			{trans("ID")}
+		</TD>
+		<TD WIDTH="80" ALIGN="CENTER" CLASS="head">
+			{trans("Node name")}
+		</TD>
+		<TD WIDTH="75" ALIGN="CENTER" CLASS="head">
+			{trans("IP address")}
+			<br>({trans("Network name")})
+		</TD>
+		<TD WIDTH="75" ALIGN="CENTER" CLASS="head">
+			{trans("MAC address")}
+		</TD>
+		<TD WIDTH="150" ALIGN="CENTER" CLASS="head">
+			{trans("Owner")}
+		</TD>
+		<TD WIDTH="80" ALIGN="CENTER" CLASS="head">
+			{trans("Location")}
+		</TD>
+		<TD WIDTH="100" ALIGN="CENTER" CLASS="head">
+			{trans("Description")}
+		</TD>
+	</TR>
+	{cycle values="white,grey" print=false}
+	{foreach $nodelist as $node}
+	<TR class="{cycle}">
+		<TD ALIGN="CENTER">
+			{counter}.
+		</TD>
+		<TD ALIGN="CENTER">
+			{$node.id|string_format:"%04d"}
+		</TD>
+		<TD ALIGN="LEFT">
+			<B>{$node.name}</B>
+		</TD>
+		<TD ALIGN="CENTER">
+			{$node.ip}
+			<br>({$node.netname})
+		</TD>
+		<TD ALIGN="CENTER">
+			{$node.mac|replace:",":"<BR>"}
+		</TD>
+		<TD ALIGN="LEFT">
+			{$node.owner}
+		</TD>
+		<TD align="left">
+			{$node.location}
+		</TD>
+		<TD ALIGN="LEFT">
+			{$node.info}
+		</TD>
+	</TR>
+	{foreachelse}
+	<TR>
+		<TD COLSPAN="8" class="empty-table">
+			<p>{trans("No such nodes in database.")}</p>
+		</TD>
+	</TR>
+	{/foreach}
+</TABLE>
+{include file="clearfooter.html"}

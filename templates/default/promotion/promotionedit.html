@@ -1,0 +1,60 @@
+{extends file="layout.html"}
+{block name=title}LMS: {$layout.pagetitle|striphtml}{/block}
+{block name=module_content}
+<!-- $Id$ -->
+<H1>{$layout.pagetitle}</H1>
+<FORM method="post" name="promotionedit" action="?m=promotionedit&amp;id={$promotion.id}">
+<p style="display: none;">
+<INPUT type="submit" class="hiddenbtn">
+</p>
+<TABLE class="lmsbox">
+	<colgroup>
+		<col style="width: 1%;">
+		<col style="width: 1%;">
+		<col style="width: 98%;">
+	</colgroup>
+	<THEAD>
+	<TR>
+		<TD>
+			{icon name="money" class="fa-fw"}
+		</TD>
+		<TD class="bold">
+			{trans("Name:")}
+		</TD>
+		<TD>
+			<INPUT type="TEXT" name="promotion[name]" value="{$promotion.name}" size="40"
+				{if !empty($promotion.assignmentcount) && !ConfigHelper::checkPrivilege('superuser')}
+					readonly {tip text="Promotion is indirectly assigned to liabilities, so name change is disabled!" trigger="name" bold=1}
+				{else}
+					{tip text="Enter promotion name" trigger="name" bold=1}
+				{/if}>
+		</TD>
+	</TR>
+	</THEAD>
+	<TBODY>
+	<TR>
+		<TD>
+			{icon name="optional-info" class="fa-fw"}
+		</TD>
+		<TD class="bold">
+			{trans("Description:")}
+		</TD>
+		<TD>
+			<TEXTAREA name="promotion[description]" cols="50" rows="5" {tip text="Enter additional information (optional)"}>{$promotion.description}</TEXTAREA>
+		</TD>
+	</TR>
+	<TR>
+		<TD class="lms-ui-box-buttons" colspan="3">
+			{button icon="save" label="Submit" onclick="document.promotionedit.submit();"}
+			{button icon="cancel" label="Cancel" href="?m=promotionlist"}
+		</TD>
+	</TR>
+	</TBODY>
+</TABLE>
+</FORM>
+<script>
+
+	document.forms['promotionedit'].elements['promotion[name]'].focus();
+
+</script>
+{/block}

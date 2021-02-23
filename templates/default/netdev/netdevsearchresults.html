@@ -1,0 +1,141 @@
+{extends file="layout.html"}
+{block name=title}LMS: {$layout.pagetitle|striphtml}{/block}
+{block name=module_content}
+<!--// $Id$ //-->
+<H1>{$layout.pagetitle}</H1>
+
+{$lastonline_limit=ConfigHelper::getConfig('phpui.lastonline_limit')}
+
+<TABLE class="lmsbox lms-ui-background-cycle">
+    <COLGROUP>
+		<COL style="width: 95%;">
+		<COL style="width: 1%;">
+		<COL style="width: 1%;">
+		<COL style="width: 1%;">
+		<COL style="width: 1%;">
+		<COL style="width: 1%;">
+	</COLGROUP>
+	<THEAD>
+	<TR {tip text="Click on column name to change sorting order"}>
+		<TD>
+			<IMG src="img/netdev.gif" ALT="">&nbsp;<A href="?m=netdevsearch&search&o=name{if $listdata.direction == "asc" && $listdata.order == "name"},desc{/if}"><B>{trans("Name:")}</B></A> {if $listdata.order == "name"}<IMG src="img/{if $listdata.direction == "desc"}asc{else}desc{/if}_order.gif" alt="">{/if}<BR>
+			<IMG src="img/producer.gif" ALT="">&nbsp;<A href="?m=netdevsearch&search&o=producer{if $listdata.direction == "asc" && $listdata.order == "producer"},desc{/if}">{trans("Manufacturer:")}</A> {if $listdata.order == "producer"}<IMG src="img/{if $listdata.direction == "desc"}asc{else}desc{/if}_order.gif" alt="">{/if} /
+			<A href="?m=netdevsearch&search&o=model{if $listdata.direction == "asc" && $listdata.order == "model"},desc{/if}">{trans("Model:")}</A> {if $listdata.order == "model"}<IMG src="img/{if $listdata.direction == "desc"}asc{else}desc{/if}_order.gif" alt="">{/if}
+		</TD>
+		<TD class="valign-top nobr">
+			<A href="?m=netdevsearch&search&o=location{if $listdata.direction == "asc" && $listdata.order == "location"},desc{/if}">{trans("Location:")}</A> {if $listdata.order == "location"}<IMG src="img/{if $listdata.direction == "desc"}asc{else}desc{/if}_order.gif" alt="">{/if}
+		</TD>
+		<TD class="nobr align-left valign-top">
+			<A href="?m=netdevsearch&search&o=netnode{if $listdata.direction == "asc" && $listdata.order == "netnode"},desc{/if}">{trans("Network node:")}</A> {if $listdata.order == "netnode"}<IMG src="img/{if $listdata.direction == "desc"}asc{else}desc{/if}_order.gif" alt="">{/if}
+		</TD>
+		<TD class="valign-top text-right">
+			<A href="?m=netdevsearch&search&o=id{if $listdata.direction == "asc" && $listdata.order == "id"},desc{/if}">ID:</A> {if $listdata.order == "id"}<IMG src="img/{if $listdata.direction == "desc"}asc{else}desc{/if}_order.gif" alt="">{/if}
+		</TD>
+		<TD class="nobr">
+			<IMG src="img/port.gif" ALT="">&nbsp;<A href="?m=netdevsearch&search&o=ports{if $listdata.direction == "asc" && $listdata.order == "ports"},desc{/if}">{trans("Number of ports:")}</A> {if $listdata.order == "ports"}<IMG src="img/{if $listdata.direction == "desc"}asc{else}desc{/if}_order.gif" alt="">{/if}
+			(<A href="?m=netdevsearch&search&o=takenports{if $listdata.direction == "asc" && $listdata.order == "takenports"},desc{/if}">{trans("Ports used:")}</A>{if $listdata.order == "takenports"}<IMG src="img/{if $listdata.direction == "desc"}asc{else}desc{/if}_order.gif" alt="">{/if})<BR>
+			<IMG src="img/serialnumber.gif" ALT="">&nbsp;<A href="?m=netdevsearch&search&o=serialnumber{if $listdata.direction == "asc" && $listdata.order == "serialnumber"},desc{/if}">{trans("Serial number:")}</A> {if $listdata.order == "serialnumber"}<IMG src="img/{if $listdata.direction == "desc"}asc{else}desc{/if}_order.gif" alt="">{/if}
+		</TD>
+		<TD class="bold text-right nobr">
+			{trans("Total:")} {$listdata.total|default:"0"}
+		</TD>
+	</TR>
+	{if $listdata.total != 0}
+	<TR>
+		<TD class="lms-ui-pagination" colspan="6">
+			{include file="scroller.html" loop=$netdevlist adlink="&search=1"}
+		</TD>
+	</TR>
+	{/if}
+	</THEAD>
+	<TBODY>
+	{section name=netdevlist loop=$netdevlist start=$start max=$pagelimit}
+	{$netdev=$netdevlist[netdevlist]}
+	<TR class="highlight" data-target-url="?m=netdevinfo&id={$netdev.id}" data-name="{$netdev.name}">
+		<TD class="valign-top">
+			{if $netdev.lastonline}
+				{if ($smarty.now-$netdev.lastonline) > $lastonline_limit}
+					<i class="lms-ui-icon-netdevoff" {tip a=$netdev.lastonlinedate text="Last online: \$a"}></i>
+				{else}
+					<i class="lms-ui-icon-netdevon" {tip a="on-line" text="Last online: \$a"}></i>
+				{/if}
+			{else}
+				<i class="lms-ui-icon-netdevunk"></i>
+			{/if}
+			<a name="{$netdev.id}"
+					title="{$netdev.description|replace:"\n":"<br>"|default:trans("- no description -")}{if $netdev.filecontainers}<br><br><i class='lms-ui-icon-fileupload'></i>&nbsp;{implode('<br><i class=\'lms-ui-icon-fileupload\'></i>&nbsp;', $netdev.filecontainers)}{/if}"
+					><B>{$netdev.name}</B></A>
+			<BR>
+			<IMG src="img/producer.gif" ALT=""> {$netdev.producer} {if $netdev.model}/ {$netdev.model}{/if}
+		</TD>
+		<TD class="valign-top nobr">
+			{if $netdev.location}
+				{$netdev.location}
+				{if $netdev.borough_name}
+					<div class="blend">
+						({$netdev.state_name} / {$netdev.district_name} / {$_BOROUGHTYPES[$netdev.borough_type]} {$netdev.borough_name})
+					</div>
+				{/if}
+			{elseif $netdev.netnodeid && $netnodes[$netdev.netnodeid].location}
+				{$netnodeid=$netdev.netnodeid}
+				{$netnodes[$netnodeid].location} {trans("(from network node)")}
+				{if $netnodes[$netnodeid].location_borough_name}
+					<div class="blend">
+						({$netnodes[$netnodeid].location_state_name} / {$netnodes[$netnodeid].location_district_name} / {$_BOROUGHTYPES[$netnodes[$netnodeid].location_borough_type]} {$netnodes[$netnodeid].location_borough_name})
+					</div>
+				{/if}
+			{/if}
+		</TD>
+		<TD class="nobr valign-top">
+			{if $netdev.netnode}<IMG src="img/netnode.png" alt=""><a href="?m=netnodeinfo&id={$netdev.netnodeid}"> {$netdev.netnode}</a>{/if}
+			{if $netdev.customerid}<IMG src="img/customer.png" alt=""><a href="?m=customerinfo&id={$netdev.customerid}"> {$netdev.customerid}</a>{/if}
+		</TD>
+		<TD class="valign-top text-right">
+			({$netdev.id|string_format:"%04d"})
+		</TD>
+		<TD class="nobr">
+			<IMG src="img/port.gif" ALT=""> {$netdev.ports} ({$netdev.takenports})<BR>
+			<IMG src="img/serialnumber.gif" ALT=""> {$netdev.serialnumber}
+		</TD>
+		<TD class="text-right nobr">
+			<a class="delete-netdev" href="?m=netdevdel&id={$netdev.id}&is_sure=1"><IMG src="img/delete.gif" alt="{trans("Delete")}" title="{trans("Delete")}"></A>
+			<a href="?m=netdevedit&id={$netdev.id}"><IMG src="img/edit.gif" alt="{trans("Edit")}" title="{trans("Edit")}"></A>
+			<a href="?m=netdevadd&id={$netdev.id}"><IMG src="img/clone.gif" alt="{trans("Clone")}" title="{trans("Clone")}"></A>
+			<a href="?m=netdevinfo&id={$netdev.id}"><IMG src="img/info.gif" alt="{trans("Info")}" title="{trans("Info")}"></A>
+		</TD>
+	</TR>
+	{if $netdevlist[netdevlist.index_next].ownerid == $netdev.ownerid && $listdata.order == "owner"}{cycle print=false}{/if}
+	{sectionelse}
+	<TR>
+		<TD colspan="6" class="empty-table">
+			<p>{trans("No such devices matching search criteria.")}</p>
+		</TD>
+	</TR>
+	{/section}
+    </TBODY>
+    <TFOOT>
+	{if $listdata.total != 0}
+	<TR>
+		<TD class="lms-ui-pagination" colspan="6">
+			{include file="scroller.html" loop=$netdevlist adlink="&search=1"}
+		</TD>
+	</TR>
+	{/if}
+	<TR>
+		<TD class="bold text-right" COLSPAN="5">
+			{trans("Total:")} {$listdata.total|default:"0"}
+		</TD>
+		<TD></TD>
+	</TR>
+    </TFOOT>
+</TABLE>
+	<script>
+		$('.delete-netdev').click(function() {
+			var name = $(this).closest('tr').attr('data-name');
+			confirmDialog($t("Are you sure, you want to remove device '$a' from database?", name), this).done(function() {
+				location.href = $(this).attr('href');
+			});
+			return false;
+		});
+	</script>
+{/block}

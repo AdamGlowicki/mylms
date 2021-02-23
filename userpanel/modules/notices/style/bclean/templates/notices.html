@@ -1,0 +1,81 @@
+{include file="header.html"}
+{$xajax}
+{if $warning}
+	{box title="Warning to you"}
+	<div class="alert alert-warning" role="alert">
+		{$warning}
+		<a class="alert-link" href="?m=notices&amp;confirm_old=1">{trans("I confirm reading")}</a>
+	</div>
+	{/box}
+{/if}
+
+{box title="Notice to you"}
+{if $notice}
+	<div class="table-responsive">
+		<table class="table table-bordered table-condensed table-striped">
+			<tr class="bg-primary text-white">
+				<th>{trans("Date:")}</th>
+				<th>{trans("Status:")}</th>
+				<th>{trans("Subject:")}</th>
+				<th>{trans("Read status:")}</th>
+			</tr>
+			{foreach $notice as $items}
+				<tr class="{if $items.status==$smarty.const.MSG_ERROR}text-danger{elseif $items.status==$smarty.const.MSG_SENT}text-muted{/if}" onCLick="ReadNotice('{$items.id}');">
+					<td>{$items.cdate|date_format:"%Y/%m/%d %H:%M"}</td>
+					<td>{if $items.type == $smarty.const.MSG_USERPANEL_URGENT}<strong>{trans("Urgent")}</strong>{else}{trans("Casual")}{/if}</td>
+					<td>{$items.subject}</td>
+					<td>
+						{if $items.type == $smarty.const.MSG_USERPANEL_URGENT || $items.type == $smarty.const.MSG_USERPANEL}
+							{if $items.status == $smarty.const.MSG_SENT && !$items.lastreaddate}
+								{trans("Unread")}
+							{elseif $items.status == $smarty.const.MSG_SENT || $items.status == $smarty.const.MSG_DELIVERED}
+								{trans("Was read on:")}<br />
+								{$items.lastreaddate|date_format:"%Y/%m/%d %H:%M"}
+							{/if}
+						{/if}
+					</td>
+				</tr>
+				<tr id="{$items.id}" style="display:none;">
+					<td colspan="4" >
+						<h3>{trans("Body:")}</h3>
+						{if $items.mibody}
+							{if $items.contenttype == 'text/plain'}
+								{nl2br(htmlspecialchars($items.mibody), false)}
+							{elseif $items.contenttype == 'text/html'}
+								{$items.mibody}
+							{else}
+								{nl2br($items.mibody, false)}
+							{/if}
+						{else}
+							{if $items.contenttype == 'text/plain'}
+								{nl2br(htmlspecialchars($items.body), false)}
+							{elseif $items.contenttype == 'text/html'}
+								{$items.body}
+							{else}
+								{nl2br($items.body, false)}
+							{/if}
+						{/if}
+						<br><br>
+						{if $items.status != $smarty.const.MSG_DELIVERED}
+							<a class="btn btn-primary" href="?m=notices&confirm={$items.id}">{trans("I confirm reading")}</a>
+						{/if}
+					</td>
+				</tr>
+				<SCRIPT type="text/javascript">
+					<!--
+					function ReadNotice(elem) {
+						xajax_setNoticeRead(elem);
+						showOrHide(elem);
+					}
+					if (getCookie('{$items.id}') == '1')
+						document.getElementById('{$items.id}').style.display = '';
+					//-->
+				</SCRIPT>
+			{/foreach}
+		</table>
+	</div>
+{else}
+	<div class="alert alert-info" role="alert">{trans("We don't have any notices to you.")}</div>
+{/if}
+{/box}
+{include file="footer.html"}

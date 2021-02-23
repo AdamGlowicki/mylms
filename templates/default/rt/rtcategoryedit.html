@@ -1,0 +1,127 @@
+{extends file="layout.html"}
+{block name=title}LMS: {$layout.pagetitle|striphtml}{/block}
+{block name=module_content}
+<!--// $Id$ //-->
+<H1>{$layout.pagetitle}</H1>
+<FORM METHOD="POST" NAME="category" ACTION="?m=rtcategoryedit&id={$category.id}">
+<INPUT type="submit" class="hiddenbtn">
+<TABLE class="lmsbox">
+	<COLSPAN>
+		<COL style="width: 1%;">
+		<COL style="width: 1%;">
+		<COL style="width: 98%;">
+	</COLSPAN>
+    <THEAD>
+	<TR>
+	    <TD>
+		<IMG src="img/queue.gif" ALT="">
+	    </TD>
+	    <TD class="bold">{trans("Name:")}</TD>
+	    <TD class="bold">
+		<INPUT TYPE="TEXT" NAME="category[name]" VALUE="{$category.name}" {tip text="Enter category name" trigger="name" bold=1}>({$category.id|string_format:"%04d"})
+	    </TD>
+	</TR>
+    </THEAD>
+    <TBODY>
+	<TR>
+	    <TD>
+		<IMG src="img/info1.gif" ALT="">
+	    </TD>
+	    <TD class="bold">{trans("Description:")}</TD>
+	    <TD>
+		<TEXTAREA NAME="category[description]" COLS="50" ROWS="2" {tip text="Enter additional information (optional)"}>{$category.description}</TEXTAREA>
+	    </TD>
+	</TR>
+	<TR>
+		<TD>
+			{icon name="color"}
+		</TD>
+		<TD class="bold">
+			<label for="background-style">
+				{trans("<!rt-category>Background:")}
+			</label>
+		</TD>
+		<TD class="bold">
+			<input id="background-style" type="color" name="category[background-style]" value="{if empty($category['background-style'])}#ffffff{else}{$category['background-style']}{/if}">
+		</TD>
+	</TR>
+	<TR>
+		<TD>
+			{icon name="color"}
+		</TD>
+		<TD class="bold">
+			<label for="text-style">
+				{trans("<!rt-category>Text:")}
+			</label>
+		</TD>
+		<TD class="bold">
+			<input id="text-style" type="color" name="category[text-style]" value="{if empty($category['text-style'])}#000000{else}{$category['text-style']}{/if}">
+		</TD>
+	</TR>
+	<TR>
+	    <TD>
+		<IMG src="img/users.gif" ALT="">
+	    </TD>
+	    <TD><B>{trans("Users:")}</B></TD>
+	    <TD>
+		    <TABLE class="lmsbox">
+			<COLSPAN>
+				<COL style="width:99%">
+				<COL style="width:1%">
+			</COLSPAN>
+                        <THEAD>
+			<TR>
+			    <TD class="bold">{trans("User")}</TD>
+			    <TD class="bold nobr align-center">{trans("Owner")}</TD>
+			</TR>
+                        </THEAD>
+                        <TBODY class="lms-ui-multi-check">
+			{cycle values="light,lucid" print=false}
+			{foreach from=$category.owners item=user}
+			<TR class="highlight {cycle}">
+			    <TD>
+				<A href="?m=userinfo&id={$user.id}">{$user.rname|escape} ({$user.login})</A>
+			    </TD>
+			    <TD class="text-center">
+			    	    <INPUT type="checkbox" name="category[users][{$user.id}]" class="lms-ui-multi-check" value="1" {if $user.owner > 0}CHECKED{/if}>
+			    </TD>
+			</TR>
+			{/foreach}
+                        <TR>
+                                <TD class="text-right">
+                                        <label for="allbox">{trans("Check All")}</label>
+                                </TD>
+                                <TD class="text-center">
+                                        <INPUT TYPE="checkbox" NAME="allbox" id="allbox" class="lms-ui-multi-check-all">
+                                </TD>
+                        </TR>
+                        </TBODY>
+		</TABLE>
+	    </TD>
+	</TR>
+	<TR>
+		<TD COLSPAN="3" class="lms-ui-box-buttons">
+			{button type="submit" icon="save" label="Submit"}
+			{button id="delete-rtcategory" icon="delete" label="Delete" data_name="{$category.name}"
+				href="?m=rtcategorydel&id={$category.id}" data-name="{$category.name}"}
+			{button icon="cancel" label="Cancel" onclick="location.href = '?m=rtcategorylist';"}
+		</TD>
+	</TR>
+    </TBODY>
+</TABLE></FORM></P>
+<script>
+
+	$(function() {
+		$('form[name="category"] [name="category[name]"]').focus();
+
+		$('#delete-rtcategory').click(function() {
+			var name = $(this).attr('data-name');
+			confirmDialog($t("Are you sure, you want to remove category '$a'?", name), this).done(function() {
+				location.href = $(this).attr('href');
+			});
+			return false;
+		});
+	});
+
+</script>
+{/block}

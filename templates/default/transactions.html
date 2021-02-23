@@ -1,0 +1,64 @@
+<!--// $Id$ //-->
+
+<FORM name="search" method="post" action="?m=archiveview">
+	<INPUT type="submit" class="hiddenbtn">
+	<INPUT type="hidden" name="search[resourcetype]" value="{$resourcetype}">
+	<INPUT type="hidden" name="search[resourceid]" value="{$resourceid}">
+	<INPUT type="hidden" name="search[userid]" value="{$userid}">
+</FORM>
+
+{tab_container id="transactions" label="Transaction Log"}
+
+	{tab_header content_id="transactionpanel"}
+		{tab_header_cell icon="lms-ui-icon-transactions"}
+			<strong>{trans("Transaction Log:")}</strong>&nbsp;({t a=300}last $a transactions{/t})
+		{/tab_header_cell}
+		{tab_header_cell}
+			<A href="#" id="more-transactions">{trans("More")} &raquo;</A>
+		{/tab_header_cell}
+	{/tab_header}
+
+	{tab_contents id="transactionpanel"}
+
+		{tab_table}
+
+			<div id="transactions-datatable" class="lms-ui-tab-table lms-ui-tab-hourglass">
+				<i></i>
+			</div>
+
+		{/tab_table}
+
+	{/tab_contents}
+{/tab_container}
+
+<SCRIPT>
+
+	$(function() {
+		$('#more-transactions').click(function(e) {
+			e.stopPropagation();
+			$('form[name=search]').submit();
+		});
+
+		function loadTransactionList() {
+			$.ajax({
+				url: location.href.replace(/#.*$/, '') + '&oper=loadtransactionlist',
+				dataType: "html",
+				method: "GET",
+				success: function(data) {
+					$('#transactions-datatable').replaceWith(data);
+					init_datatables('#transactions-datatable');
+					$('#transactions-datatable').show();
+				}
+			})
+		}
+
+		if ($('#transactionpanel').is(':visible')) {
+			loadTransactionList();
+		} else {
+			$('[data-lmsbox-content="transactionpanel"]').one('click', function() {
+				loadTransactionList();
+			});
+		}
+	});
+
+</SCRIPT>

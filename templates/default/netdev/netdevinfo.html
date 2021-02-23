@@ -1,0 +1,48 @@
+{extends file="layout.html"}
+{block name=title}LMS: {$layout.pagetitle|striphtml}{/block}
+{block name=module_content}
+<!--// $Id$ //-->
+{$xajax}
+<H1>{$layout.pagetitle}</H1>
+<div id="netdevinfo-sortable" class="lms-ui-sortable-persistent">
+{block name=netdevinfobox}
+	{include file="netdev/netdevinfobox.html"}
+{/block}
+{block name=netdevipbox}
+	{include file="netdev/netdevipbox.html"}
+{/block}
+{block name=netdevattachments}
+	{include file="attachments.html" attachmenttype="netdevid" attachmentresourceid=$netdev.id}
+{/block}
+{$attachment_support_already_loaded = true}
+{block name=netdevmodelattachments}
+	{include file="attachments.html" attachmenttype="netdevmodelid" attachmentresourceid=$netdev.modelid}
+{/block}
+{block name="transactions"}
+	{if ConfigHelper::checkConfig('phpui.logging') && ConfigHelper::checkPrivilege('transaction_logs')}
+		{include file="transactions.html"}
+	{/if}
+{/block}
+{block name=netdevassignments}
+	{include file="customer/customerassignments.html" tab_label=trans("Network Device Liabilities:")}
+{/block}
+{block name=netdevmanagementurl}
+	{include file="managementurl/managementurls.html"}
+{/block}
+{block name=netdevconnbox}
+	{include file="netdev/netdevconnbox.html"}
+{/block}
+{block name=netdevnodes}
+	{include file="netdev/netdevnodes.html"}
+{/block}
+{block name=netdevradiosectors}
+	{include file="netdev/radiosectors.html"}
+{/block}
+{block name=netdevtickets}
+        {include file="netdev/netdevtickets.html"}
+{/block}
+</div>
+<script type="text/javascript">
+	restoreSortable('netdevinfo-sortable', '{$netdevinfo_sortable_order}');
+</script>
+{/block}

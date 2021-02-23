@@ -1,0 +1,117 @@
+{css}
+{js}
+
+{tab_container id="customernetworksbox" label="Customer Networks"}
+
+	{tab_header content_id="networkspanel-`$layout.module`"}
+		{tab_header_cell icon="lms-ui-icon-network"}
+			<strong>{t a=$customernetworks|@count|default:"0"}Customer Networks ($a):{/t}</strong>
+		{/tab_header_cell}
+		{tab_header_cell}
+			{if $customerinfo.status != $smarty.const.CSTATUS_INTERESTED && !$customerinfo.deleted}
+				<A href="?m=netadd&ownerid={$customerinfo.id}">{trans("New Network")} &raquo;</A>
+			{/if}
+		{/tab_header_cell}
+	{/tab_header}
+
+	{tab_contents id="networkspanel-`$layout.module`"}
+
+		{tab_table}
+
+			{if $customernetworks}
+			<div class="lms-ui-tab-table-row header">
+				<div class="lms-ui-tab-table-wrapper col-4">
+					<div class="lms-ui-tab-table-wrapper col-2">
+						<div class="lms-ui-tab-table-column name">
+							{trans("Name:")}
+						</div>
+						<div class="lms-ui-tab-table-column id">
+							{trans("ID:")}
+						</div>
+					</div>
+
+					<div class="lms-ui-tab-table-wrapper col-3">
+						<div class="lms-ui-tab-table-column address">
+							{trans("Address:")}
+						</div>
+						<div class="lms-ui-tab-table-column router">
+							{trans("Routed via:")}
+						</div>
+						<div class="lms-ui-tab-table-column host">
+							{trans("Host:")}
+						</div>
+					</div>
+				</div>
+
+				<div class="lms-ui-tab-table-column buttons">
+				</div>
+			</div>
+			{/if}
+
+			{foreach $customernetworks as $network}
+				<div class="lms-ui-tab-table-row{if $network.disabled} blend{/if}" data-target-url="?m=netinfo&id={$network.id}">
+					<div class="lms-ui-tab-table-wrapper col-4">
+						<div class="lms-ui-tab-table-wrapper col-2">
+							<div class="lms-ui-tab-table-column name">
+								<strong>{$network.name}</strong>
+								{if $network.location}<BR>
+									<br><strong>{$network.location|truncate:60:"&hellip;":true}</strong>
+								{/if}
+							</div>
+							<div class="lms-ui-tab-table-column id">
+								({$network.id|string_format:"%04d"})
+							</div>
+						</div>
+
+						<div class="lms-ui-tab-table-wrapper col-3">
+							<div class="lms-ui-tab-table-column address">
+								{$network.ip}
+							</div>
+							<div class="lms-ui-tab-table-column router">
+								{if empty($network.routernodename)}
+									-
+								{else}
+									<strong>
+										{if empty($network.routernetdevid)}
+											{icon name="node"}
+											<a href="?m=nodeinfo&id={$network.routernodeid}">{$network.routernodename}</a>
+										{else}
+											{icon name="netdev"}
+											<a href="?m=netdevinfo&id={$network.routernetdevid}&ip={$network.routernodeid}">{$network.routernetdevname} / {$network.routernodename}</a>
+										{/if}
+									</strong>
+									({$network.routerip})
+								{/if}
+							</div>
+							<div class="lms-ui-tab-table-column host">
+								{$network.hostname}
+							</div>
+						</div>
+					</div>
+
+					<div class="lms-ui-tab-table-column buttons">
+						{button type="link" href="?m=netedit&networkset&id={$network.id}"
+							icon="{if $network.disabled}disconnected{else}connected{/if}"
+							tip="{if $network.disabled}Connect{else}Disconnect{/if}"}
+						{button type="link" icon="delete" class="delete-network" href="?m=netdel&id={$network.id}" tip="Delete"}
+						{button type="link" href="?m=netedit&id={$network.id}" icon="edit"
+							tip="Edit"}
+						{button type="link" href="?m=netinfo&id={$network.id}" icon="info"
+							tip="Info"}
+					</div>
+				</div>
+
+			{foreachelse}
+			<div class="lms-ui-tab-empty-table{if $customerinfo.deleted} red{/if}">
+				{if $customerinfo.deleted}
+					{trans("That customer has been deleted.")}
+				{else}
+					{trans("That customer hasn't got any network.")}
+				{/if}
+			</div>
+			{/foreach}
+
+		{/tab_table}
+
+	{/tab_contents}
+{/tab_container}

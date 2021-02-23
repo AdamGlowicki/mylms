@@ -1,0 +1,236 @@
+{extends file="layout.html"}
+{block name=title}LMS: {$layout.pagetitle|striphtml}{/block}
+{block name=module_content}
+<!--// $Id$ //-->
+<H1>{$layout.pagetitle}</H1>
+{$xajax}
+
+<style>
+
+	.docattachrow a:nth-child(2) {
+		margin-left: 0.5em;
+	}
+
+</style>
+
+<P><FORM name="documentedit" method="POST" id="documentedit-form" action="?m=documentedit&id={$document.id}" enctype="multipart/form-data">
+<INPUT type="submit" class="hiddenbtn">
+<INPUT type="hidden" name="customerid" value="{$document.customerid}">
+<TABLE class="lmsbox">
+	<COLGROUP>
+		<COL style="width: 1%;">
+		<COL style="width: 1%;">
+		<COL style="width: 98%;">
+	</COLGROUP>
+    <THEAD>
+	<TR>
+		<TD>
+			<IMG src="img/docum.gif" alt="">
+		</TD>
+		<TD class="bold nobr">
+			{trans("Title:")}
+		</TD>
+		<TD class="nobr">
+			<INPUT type="text" name="document[title]" value="{$document.title}" required {tip text="Enter document title" trigger="title"} size="40">
+		</TD>
+	</TR>
+    </THEAD>
+    <TBODY>
+	<TR>
+		<TD>
+			<IMG src="img/info.gif" alt="">
+		</TD>
+		<TD class="bold">
+			{trans("Type:")}
+		</TD>
+		<TD>
+			<SELECT SIZE="1" NAME="document[type]" onchange="setnumberplans();" {tip text="Select document type" trigger="type"}>
+				{foreach from=$_DOCTYPES key=key item=item}{if $key < 0 && in_array($key, $docrights)}
+				<OPTION VALUE="{$key}"{if $document.type==$key} SELECTED{/if}>{$item}</OPTION>
+				{/if}{/foreach}
+			</SELECT>
+		</TD>
+	</TR>
+	<TR>
+		<TD>
+			<IMG src="img/docum.gif" alt="">
+		</TD>
+		<TD class="bold">
+			{trans("Number:")}
+		</TD>
+		<TD>
+			<INPUT type="text" name="document[number]" value="{$document.number}" size="15" {tip text="Enter document number (leave this field empty to obtain next number)" trigger="number"}>&nbsp;
+			<DIV id="numberplans" style="display: {if empty($numberplans)}none{else}inline{/if};">
+			{include file="document/documentnumberplans.html" numberplanid=$document.numberplanid cdate=$document.cdate customerid=$document.customerid}
+			</DIV>
+		</TD>
+	</TR>
+	<TR>
+		<TD>
+			<IMG src="img/calendar.gif" alt="">
+		</TD>
+		<TD class="bold">
+			{trans("Period:")}
+		</TD>
+		<TD>
+			{trans("from:")} <INPUT type="TEXT" name="document[fromdate]" value="{if $document.fromdate}{$document.fromdate}{/if}" placeholder="{trans("yyyy/mm/dd")}" {tip class="lms-ui-date" text="Enter start date in YYYY/MM/DD format (optional)" trigger="fromdate"} size="10">&nbsp;
+			{trans("to:")} <INPUT type="TEXT" name="document[todate]" value="{if $document.todate}{$document.todate}{/if}" placeholder="{trans("yyyy/mm/dd")}" {tip class="lms-ui-date" text="Enter end date in YYYY/MM/DD format (optional)" trigger="todate"} size="10"><BR>
+		</TD>
+	</TR>
+	{if !$document.closed}
+	<TR>
+		<TD>
+			<IMG src="img/calendar.gif" alt="">
+		</TD>
+		<TD class="bold">
+			{trans("Wait for customer action till:")}
+		</TD>
+		<TD>
+			<INPUT type="TEXT" name="document[confirmdate]" id="confirmdate" value="{if $document.confirmdate > 0}{$document.confirmdatestring}{/if}"
+				   placeholder="{trans("yyyy/mm/dd")}"
+					{tip class="lms-ui-date" text="Enter date in YYYY/MM/DD format we wait for customer action till (optional)" trigger="confirmdate"} size="10">
+			{if $document.confirmdate == -1}
+				&nbsp;<span class="bold red">{trans("Warning! Customer submitted signed document scan. Consider to review it and then possibly confirm.")}</span>
+			{elseif $document.confirmdate && $document.confirmdate < $smarty.now}
+				&nbsp;<span class="bold red">{trans("Warning! Customer action time limit is expired is expired!")}</span>
+			{/if}
+		</TD>
+	</TR>
+	{/if}
+	<TR>
+		<TD>
+			<IMG src="img/info.gif" alt="">
+		</TD>
+		<TD class="bold">
+			{trans("Description:")}
+		</TD>
+		<TD>
+			<TEXTAREA name="document[description]" rows="5" cols="50" {tip text="Enter additional information (optional)"}>{$document.description}</TEXTAREA>
+		</TD>
+	</TR>
+	<TR>
+		<TD>
+			<IMG src="img/save.gif" alt="">
+		</TD>
+		<TD class="bold nobr">
+			{trans("New files:")}
+		</TD>
+		<TD>
+			{fileupload id="attachments" fileupload=$fileupload form="documentedit-form"}
+		</TD>
+	</TR>
+	{if !empty($document.attachments)}
+	<TR>
+		<TD>
+			<IMG src="img/attach.gif" alt="">
+		</TD>
+		<TD class="bold nobr">
+			{trans("Attached files:")}
+		</TD>
+		<TD class="nobr">
+			{foreach $document.attachments as $docattach}
+			<div class="docattachrow{if $docattach.type <= 0} docattach{if $document.attachments[$docattach.id].deleted} blend crossed{/if}{/if}">
+				<a href="#">
+					<i class="fa-fw lms-ui-icon-{if $document.attachments[$docattach.id].deleted}cancel{else}delete{/if}"
+							{if $docattach.type == 1} style="visibility: hidden;"{/if}></i>
+				</a>
+				{$class = ""}
+				{if $document.attachments[$docattach.id].deleted}
+					{$class = "blend"}
+				{/if}
+				{documentview id="{$document.id}-{$docattach.id}" type=$docattach.contenttype name=$docattach.filename
+					url="?m=documentview&id={$document.id}&attachmentid={$docattach.id}" external=true class=$class
+					text="{$docattach.filename} <i class=\"lms-ui-icon-view{if preg_match('/pdf/',$docattach.contenttype)} pdf{elseif preg_match('/csv|excel|spreadsheet/',$docattach.contenttype)} xls{/if}\"></i>"}
+				{if $docattach.type == -1}<i class="lms-ui-icon-user" title="<strong>{t a=date("Y/m/d H:i", $docattach.cdate)}Sent by customer at $a{/t}</strong>"></i>{/if}
+				<input type="hidden" name="document[attachments][{$docattach.id}][deleted]" value="{$document.attachments[$docattach.id].deleted}">
+			</div>
+			{/foreach}
+		</TD>
+	</TR>
+	{/if}
+{*
+	<TR>
+		<TD>
+			<IMG src="img/class.gif" alt="">
+		</TD>
+		<TD class="bold">
+			{trans("Template:")}
+		</TD>
+		<TD>
+			<SELECT SIZE="1" NAME="document[template]" {tip text="Select template to generate new document if you haven't got prepared file" trigger="template"}>
+				<OPTION VALUE="0">... {trans("select template")} ...</OPTION>
+				{foreach from=$docengines item=item}
+				<OPTION VALUE="{$item.name}"{if $document.template==$item.name} SELECTED{/if}>{$item.title}</OPTION>
+				{/foreach}
+			</SELECT>
+		</TD>
+	</TR>
+*}
+	{if (!$document.closed && ($document.docrights & $smarty.const.DOCRIGHT_CONFIRM)) || ConfigHelper::checkPrivilege('full_access')}
+	<TR>
+		<TD>
+			<IMG src="img/confirm.gif" ALT="">
+		</TD>
+		<TD class="bold nobr">
+			<label for="closed">{trans("Confirmed:")}</label>
+		</TD>
+		<TD>
+			<INPUT type="checkbox" name="document[closed]" id="closed" value="1" {if $document.closed} checked{/if}>
+		</TD>
+	</TR>
+	{/if}
+	{if !empty($document.closed) && ($document.docrights && $smarty.const.DOCRIGHT_ARCHIVE)}
+	<TR>
+		<TD>
+			<IMG src="img/db.gif" ALT="">
+		</TD>
+		<TD class="bold nobr">
+			<label for="archived">{trans("Archived:")}</label>
+		</TD>
+		<TD>
+			<INPUT type="checkbox" name="document[archived]" id="archived" value="1" {if $document.archived} checked{/if}>
+		</TD>
+	</TR>
+	{/if}
+	<TR>
+		<TD colspan="3" class="buttons">
+			<A href="javascript: document.documentedit.submit();">{trans("Submit")} <IMG SRC="img/save.gif" alt=""></A>
+			<A href="?m=customerinfo&id={$document.customerid}">{trans("Cancel")} <IMG src="img/cancel.gif" alt=""></A>
+		</TD>
+	</TR>
+    </TBODY>
+</TABLE>
+</FORM></P>
+
+<script>
+
+	function setnumberplans() {
+		reset_login_timeout();
+		xajax_GetNumberPlans(document.forms['documentedit'].elements['document[type]'].value,
+				document.forms['documentedit'].elements['document[numberplanid]'].value,
+				{$document.customerid});
+	}
+
+	$(function() {
+		$('form[name="documentedit"] [name="document[title]"]').focus();
+
+		$('.docattach').on('click', function() {
+			var elem = $(this);
+			elem.toggleClass('blend crossed').find('.lms-ui-button').toggleClass('blend')
+			elem.find('i').toggleClass('lms-ui-icon-delete').toggleClass('lms-ui-icon-cancel');
+			elem.find('input').val(+ elem.hasClass('blend'));
+			return false;
+		});
+
+		$('#closed').change(function() {
+			if ($('#archived').prop('checked') && !$(this).prop('checked')) {
+				$(this).prop('checked', true);
+				alertDialog($t("Cannot undo document confirmation while it is archived!"), this);
+			}
+			$('#archived').closest('tr').toggle($(this).prop('checked'));
+			$('#confirmdate').closest('tr').toggle(!$(this).prop('checked'));
+		});
+	});
+
+</script>
+{/block}

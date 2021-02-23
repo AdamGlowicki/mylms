@@ -1,0 +1,37 @@
+<TABLE class="lmsbox-inner" id="table">
+    <THEAD>
+	<TR>
+		<TD WIDTH="1%">
+			<IMG SRC="img/netdev.gif" alt="">
+		</TD>
+		<TD WIDTH="99%" NOWRAP>
+		    {if $layout.module == 'ewxdevlist'}
+		    <B>{t a=$devices|@count|default:"0"}Channel Devices ($a):{/t}</B>
+		    {else}
+			<B>{t a=$devices|@count|default:"0"}Devices ($a):{/t}</B>
+			{/if}
+		</TD>
+	</TR>
+    </THEAD>
+    <TBODY>
+	{cycle values="light,lucid" print=false}
+	{section name=devices loop=$devices}
+	<TR class="highlight {cycle}"  >
+	    <TD onClick="parent.location.href='?m=netdevinfo&id={$devices[devices].id}';">
+            <IMG src="img/netdev.gif" ALT=""><BR>
+            <IMG src="img/producer.gif" ALT="">
+	    </TD>
+		<TD onClick="parent.location.href='?m=netdevinfo&id={$devices[devices].id}';" NOWRAP>
+            <B>{$devices[devices].name}</B><BR>
+            {$devices[devices].producer} {if $devices[devices].model}/ {$devices[devices].model}{/if}{if $devices[devices].location} / {$devices[devices].location}{/if}
+		</TD>
+	</TR>
+	{sectionelse}
+	<TR>
+		<TD COLSPAN="2" class="empty-table">
+			<p>{trans("No devices found in database.")}</p>
+		</TD>
+	</TR>
+	{/section}
+    </TBODY>
+</TABLE>
